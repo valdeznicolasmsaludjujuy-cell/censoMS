@@ -14,4 +14,28 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
+
+  it("matches the administrative catalog page", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const matches = router.matchRoutes("/admin");
+
+    expect(matches.at(-1)?.routeId).toBe("/_authenticated/admin");
+  });
+
+  it("matches the user management page", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const matches = router.matchRoutes("/usuarios");
+
+    expect(matches.at(-1)?.routeId).toBe("/_authenticated/usuarios");
+  });
+
+  it("matches the forced password change page", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const matches = router.matchRoutes("/change-password");
+
+    expect(matches.at(-1)?.routeId).toBe("/change-password");
+  });
 });

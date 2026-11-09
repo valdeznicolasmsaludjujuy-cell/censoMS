@@ -29,7 +29,7 @@ alter table public.personas add column id_titulo bigint references public.titulo
 
 comment on view public.v_legajos is 'DEPRECATED: replaced by v_planilla';
 create view public.v_planilla with (security_invoker = true) as
-select l.id_legajo, l.orden, l.controlado, l.controlado_at,
+select l.id_legajo, l.controlado, l.controlado_at,
   p.id_persona, p.apellido_nombre, p.dni, p.cuil,
   u.codigo as udo_codigo, u.descripcion as udo,
   c.descripcion as categoria,

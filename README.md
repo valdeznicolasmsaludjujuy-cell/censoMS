@@ -22,3 +22,31 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Administración de usuarios
+
+Solo los usuarios con rol `admin` pueden crear cuentas, asignar roles o modificar catálogos.
+`carga` puede agregar y completar registros de toda la planilla; `consulta` tiene acceso de solo
+lectura. Las cuentas creadas reciben una contraseña temporal y deben cambiarla en su primer ingreso.
+
+Aplicá `drizzle/migrations/0007_gestion_de_usuarios.sql` en Supabase SQL Editor después de contar
+con las tablas y funciones de roles existentes. No vuelvas a ejecutar la migración inicial sobre
+una base ya configurada.
+
+El servidor de la aplicación necesita `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` y
+`SUPABASE_SERVICE_ROLE_KEY` en su entorno privado para crear cuentas y restablecer contraseñas.
+Nunca expongas la clave `SERVICE_ROLE` en variables `VITE_` ni en código de navegador. Desactivá
+también el registro público desde la configuración de autenticación de Supabase; las cuentas sin
+rol no pueden consultar datos incluso antes de desactivar esa opción.
+
+## Importar personal desde CSV
+
+En **Datos maestros → Importar personal**, descargá la plantilla CSV o guardá la hoja de Excel como
+CSV UTF-8. El importador admite hasta 1.000 filas, valida DNI/CUIL y los catálogos, omite
+duplicados y permite descargar un reporte con las filas que requieren corrección. La importación
+está disponible solo para administradores.
+
+Antes de usarla, aplicá `drizzle/migrations/0012_importar_personal_csv.sql` en Supabase SQL Editor.
+Como `legajo` no tiene un campo UDO directo y el archivo no incluye sector, la UDO se valida pero
+no se guarda; los nuevos registros aparecerán sin UDO hasta asignarles un sector desde la
+estructura organizativa.
