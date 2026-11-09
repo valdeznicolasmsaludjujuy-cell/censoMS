@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
-import { ShieldCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,10 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Ingresar — Gestión de Personal" },
-      { name: "description", content: "Acceso al sistema de gestión de personal del Ministerio de Salud." },
+      {
+        name: "description",
+        content: "Acceso al sistema de gestión de personal del Ministerio de Salud.",
+      },
       { property: "og:title", content: "Ingresar — Gestión de Personal" },
       { property: "og:description", content: "Acceso al sistema de gestión de personal." },
       { property: "og:type", content: "website" },
@@ -24,7 +26,6 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,20 +34,28 @@ function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        navigate({ to: "/planilla" });
-      } else {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        if (data.session) navigate({ to: "/planilla" });
-        else toast.success("Cuenta creada. Revisá tu email para confirmarla.");
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", data.user.id)
+        .limit(1);
+      if (rolesError) {
+        await supabase.auth.signOut();
+        throw rolesError;
       }
+      if (!roles.length) {
+        await supabase.auth.signOut();
+        throw new Error(
+          "Esta cuenta todavía no tiene un rol asignado. Contactá a un administrador.",
+        );
+      }
+
+      navigate({
+        to: data.user.app_metadata?.["must_change_password"] ? "/change-password" : "/planilla",
+      });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo ingresar");
     } finally {
@@ -55,37 +64,46 @@ function AuthPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-sidebar px-4">
-      <div className="w-full max-w-sm rounded-xl bg-card p-8 shadow-2xl">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <ShieldCheck className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ministerio de Salud</p>
-            <h1 className="text-lg font-bold text-foreground">Gestión de Personal</h1>
-          </div>
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-sm rounded-md border border-border bg-card p-6 sm:p-8">
+        <div className="mb-7">
+          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            Ministerio de Salud
+          </p>
+          <h1 className="mt-1.5 text-lg font-semibold tracking-tight text-foreground">
+            Gestión de Personal
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">Ingresá con tu cuenta institucional.</p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Contraseña</Label>
-            <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+            <Input
+              id="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Procesando…" : mode === "login" ? "Ingresar" : "Crear cuenta"}
+            {loading ? "Ingresando…" : "Ingresar"}
           </Button>
         </form>
-        <button
-          type="button"
-          onClick={() => setMode(mode === "login" ? "signup" : "login")}
-          className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-primary"
-        >
-          {mode === "login" ? "¿No tenés cuenta? Crear una" : "Ya tengo cuenta"}
-        </button>
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          Las cuentas son administradas por el equipo autorizado.
+        </p>
       </div>
     </div>
   );
