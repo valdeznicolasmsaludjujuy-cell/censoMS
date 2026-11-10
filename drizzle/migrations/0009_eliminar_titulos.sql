@@ -1,0 +1,1 @@
+-- stub: migration file lost; database state predates it

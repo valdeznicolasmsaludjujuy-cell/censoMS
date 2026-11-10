@@ -92,6 +92,13 @@
       "when": 1794262000000,
       "tag": "0012_importar_personal_csv",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794337599668,
+      "tag": "0013_direcciones_y_funciones",
+      "breakpoints": true
     }
   ]
 }

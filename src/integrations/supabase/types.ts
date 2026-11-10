@@ -94,6 +94,41 @@ export type Database = {
           },
         ]
       }
+      direcciones: {
+        Row: {
+          created_at: string
+          estado: boolean
+          id_direccion: number
+          id_secretaria: number
+          nombre: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          estado?: boolean
+          id_direccion?: never
+          id_secretaria: number
+          nombre: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          estado?: boolean
+          id_direccion?: never
+          id_secretaria?: number
+          nombre?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direcciones_id_secretaria_fkey"
+            columns: ["id_secretaria"]
+            isOneToOne: false
+            referencedRelation: "secretarias"
+            referencedColumns: ["id_secretaria"]
+          },
+        ]
+      }
       escalafones: {
         Row: {
           created_at: string
@@ -592,6 +627,7 @@ export type Database = {
         Row: {
           created_at: string
           estado: boolean
+          id_direccion: number | null
           id_secretaria: number
           id_unidad: number
           nombre: string
@@ -601,6 +637,7 @@ export type Database = {
         Insert: {
           created_at?: string
           estado?: boolean
+          id_direccion?: number | null
           id_secretaria: number
           id_unidad?: never
           nombre: string
@@ -610,6 +647,7 @@ export type Database = {
         Update: {
           created_at?: string
           estado?: boolean
+          id_direccion?: number | null
           id_secretaria?: number
           id_unidad?: never
           nombre?: string
@@ -617,6 +655,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "unidades_organizativas_id_direccion_fkey"
+            columns: ["id_direccion"]
+            isOneToOne: false
+            referencedRelation: "direcciones"
+            referencedColumns: ["id_direccion"]
+          },
           {
             foreignKeyName: "unidades_organizativas_id_secretaria_fkey"
             columns: ["id_secretaria"]
@@ -653,6 +698,7 @@ export type Database = {
           controlado: boolean | null
           controlado_at: string | null
           cuil: string | null
+          direccion: string | null
           dni: string | null
           id_legajo: number | null
           id_persona: number | null
@@ -685,8 +731,23 @@ export type Database = {
       }
     }
     Functions: {
+      admin_set_user_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       can_read: { Args: { _u: string }; Returns: boolean }
       can_write: { Args: { _u: string }; Returns: boolean }
+      crear_persona_legajo: {
+        Args: { p_legajo: Json; p_persona: Json }
+        Returns: number
+      }
+      eliminar_persona_legajo: {
+        Args: { p_id_legajo: number }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -694,6 +755,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      importar_personas_legajos: { Args: { p_filas: Json }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "carga" | "consulta"
