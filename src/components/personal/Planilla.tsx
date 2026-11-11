@@ -153,7 +153,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
           )}
         </div>
       </div>
-      <div className="overflow-hidden rounded-md border border-border bg-card">
+      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
           <div>
             <h2 className="text-sm font-semibold">Listado de personas</h2>

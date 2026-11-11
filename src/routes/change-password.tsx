@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export const Route = createFileRoute("/change-password")({
   ssr: false,
@@ -51,12 +52,19 @@ function ChangePasswordPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md rounded-md border border-border bg-card p-6 sm:p-8">
-        <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-          Ministerio de Salud
-        </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight">Creá tu contraseña personal</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+      <div className="w-full max-w-md rounded-3xl border border-border/70 bg-card/95 p-6 shadow-2xl shadow-primary/5 backdrop-blur sm:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+              Ministerio de Salud
+            </p>
+            <h1 className="mt-2 text-xl font-semibold tracking-tight">
+              Creá tu contraseña personal
+            </h1>
+          </div>
+          <ThemeToggle className="border border-border bg-background text-foreground hover:bg-accent" />
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">
           La contraseña temporal de {email} debe reemplazarse antes de continuar.
         </p>
         <form onSubmit={submit} className="mt-6 space-y-4">

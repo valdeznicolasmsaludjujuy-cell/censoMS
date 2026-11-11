@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
@@ -65,15 +66,20 @@ function AuthPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-md border border-border bg-card p-6 sm:p-8">
-        <div className="mb-7">
-          <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-            Ministerio de Salud
-          </p>
-          <h1 className="mt-1.5 text-lg font-semibold tracking-tight text-foreground">
-            Gestión de Personal
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">Ingresá con tu cuenta institucional.</p>
+      <div className="w-full max-w-sm rounded-3xl border border-border/70 bg-card/95 p-6 shadow-2xl shadow-primary/5 backdrop-blur sm:p-8">
+        <div className="mb-7 flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+              Ministerio de Salud
+            </p>
+            <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
+              Gestión de Personal
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Ingresá con tu cuenta institucional.
+            </p>
+          </div>
+          <ThemeToggle className="border border-border bg-background text-foreground hover:bg-accent" />
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1.5">

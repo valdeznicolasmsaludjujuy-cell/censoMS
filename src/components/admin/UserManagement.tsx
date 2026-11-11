@@ -1,9 +1,18 @@
 import { useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { KeyRound, Plus, RefreshCw, Users } from "lucide-react";
+import { KeyRound, Plus, RefreshCw, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +25,7 @@ import { Label } from "@/components/ui/label";
 import {
   changeManagedUserRole,
   createManagedUser,
+  deleteManagedUser,
   listUsers,
   resetManagedUserPassword,
 } from "@/components/admin/users.functions";
@@ -37,6 +47,7 @@ function UserManagement() {
   const [role, setRole] = useState<UserRole>("carga");
   const [passwordTarget, setPasswordTarget] = useState<ManagedUser | null>(null);
   const [temporaryPassword, setTemporaryPassword] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<ManagedUser | null>(null);
 
   const usersQuery = useQuery({
     queryKey: ["admin-users"],
@@ -88,6 +99,17 @@ function UserManagement() {
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
     onError: (error: Error) => toast.error(error.message || "No se pudo cambiar la contraseña"),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (userId: string) => deleteManagedUser({ data: { userId } }),
+    gcTime: 0,
+    onSuccess: async () => {
+      toast.success("La cuenta fue eliminada");
+      setDeleteTarget(null);
+      await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (error: Error) => toast.error(error.message || "No se pudo eliminar la cuenta"),
   });
 
   function submitCreate(event: FormEvent<HTMLFormElement>) {
@@ -151,7 +173,7 @@ function UserManagement() {
             </p>
           ) : (
             <div className="overflow-x-auto rounded-md border">
-              <table className="w-full min-w-[680px] text-left text-sm">
+              <table className="w-full min-w-[760px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   <tr>
                     <th scope="col" className="px-4 py-3">
@@ -213,6 +235,20 @@ function UserManagement() {
                           }}
                         >
                           <KeyRound className="mr-2 h-4 w-4" /> Contraseña temporal
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-2 border-destructive/40 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                          disabled={user.isCurrentUser || deleteMutation.isPending}
+                          title={
+                            user.isCurrentUser
+                              ? "No podés eliminar la cuenta con la que iniciaste sesión"
+                              : `Eliminar la cuenta de ${user.email}`
+                          }
+                          onClick={() => setDeleteTarget(user)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                         </Button>
                       </td>
                     </tr>
@@ -296,6 +332,38 @@ function UserManagement() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!deleteMutation.isPending && !open) setDeleteTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar esta cuenta?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se eliminará permanentemente el acceso de{" "}
+              <span className="font-medium text-foreground">{deleteTarget?.email}</span>. Esta
+              acción no se puede deshacer. Los registros de personal no se eliminarán.
+              {deleteTarget?.role === "admin" &&
+                " El sistema también impedirá eliminar la cuenta si es el último administrador."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              disabled={deleteMutation.isPending || !deleteTarget}
+              onClick={() => {
+                if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
+              }}
+            >
+              {deleteMutation.isPending ? "Eliminando…" : "Eliminar cuenta"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog
         open={passwordTarget !== null}

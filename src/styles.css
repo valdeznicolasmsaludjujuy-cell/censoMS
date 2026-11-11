@@ -68,7 +68,8 @@
 }
 
 :root {
-  --radius: 0.375rem;
+  color-scheme: light;
+  --radius: 0.875rem;
   --background: oklch(0.975 0.012 190);
   --foreground: oklch(0.25 0.025 230);
   --card: oklch(1 0 0);
@@ -110,6 +111,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.19 0.035 230);
   --foreground: oklch(0.95 0.012 190);
   --card: oklch(0.23 0.04 230);
@@ -151,8 +153,25 @@
 
   body {
     background-color: var(--color-background);
-    background-image: radial-gradient(ellipse at 10% 0%, oklch(0.9 0.045 180 / 22%), transparent 36%);
+    background-image:
+      radial-gradient(ellipse at 10% 0%, oklch(0.9 0.045 180 / 22%), transparent 36%),
+      linear-gradient(180deg, oklch(0.985 0.006 190 / 75%), transparent 30rem);
     color: var(--color-foreground);
     font-family: var(--app-font-sans);
+    -webkit-font-smoothing: antialiased;
+    transition:
+      background-color 180ms ease,
+      color 180ms ease;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(ellipse at 10% 0%, oklch(0.42 0.07 190 / 16%), transparent 34%),
+      linear-gradient(180deg, oklch(0.22 0.04 230 / 72%), transparent 34rem);
+  }
+
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
   }
 }
