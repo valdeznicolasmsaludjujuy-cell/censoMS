@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
+<<<<<<< HEAD
 import { Moon, Sun } from "@phosphor-icons/react";
+=======
+import { Moon, Sun } from "lucide-react";
+>>>>>>> c07c827 (dashbord e interfaz)
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +44,11 @@ export function ThemeToggle({ className }: { className?: string }) {
       onClick={toggleTheme}
       className={cn("shrink-0 rounded-xl", className)}
     >
+<<<<<<< HEAD
       <Icon className="h-4 w-4" />
+=======
+      <Icon className="h-4 w-4" strokeWidth={1.8} />
+>>>>>>> c07c827 (dashbord e interfaz)
     </Button>
   );
 }

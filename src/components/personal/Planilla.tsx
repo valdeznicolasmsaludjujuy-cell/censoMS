@@ -183,6 +183,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
           </div>
         </div>
       </div>
+<<<<<<< HEAD
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/90 shadow-soft backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-4 sm:px-6">
           <div className="flex items-center gap-3">
@@ -199,6 +200,15 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
                 {total} {total === 1 ? "registro" : "registros"}
               </p>
             </div>
+=======
+      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
+          <div>
+            <h2 className="text-sm font-semibold">Listado de personas</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {total} {total === 1 ? "registro" : "registros"}
+            </p>
+>>>>>>> c07c827 (dashbord e interfaz)
           </div>
           <span
             className={

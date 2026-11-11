@@ -52,6 +52,7 @@ function ChangePasswordPage() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="surface-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
@@ -77,6 +78,24 @@ function ChangePasswordPage() {
           </p>
         </div>
 
+=======
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-md rounded-3xl border border-border/70 bg-card/95 p-6 shadow-2xl shadow-primary/5 backdrop-blur sm:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
+              Ministerio de Salud
+            </p>
+            <h1 className="mt-2 text-xl font-semibold tracking-tight">
+              Creá tu contraseña personal
+            </h1>
+          </div>
+          <ThemeToggle className="border border-border bg-background text-foreground hover:bg-accent" />
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          La contraseña temporal de {email} debe reemplazarse antes de continuar.
+        </p>
+>>>>>>> c07c827 (dashbord e interfaz)
         <form onSubmit={submit} className="mt-6 space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="new-password">Nueva contraseña</Label>

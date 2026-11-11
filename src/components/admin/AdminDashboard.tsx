@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+<<<<<<< HEAD
 import {
   AlertCircle,
   BarChart3,
@@ -10,6 +11,9 @@ import {
   UsersRound,
   type LucideIcon,
 } from "lucide-react";
+=======
+import { BarChart3, RefreshCw, UsersRound } from "lucide-react";
+>>>>>>> c07c827 (dashbord e interfaz)
 import {
   Bar,
   BarChart,
@@ -35,6 +39,7 @@ import { Label } from "@/components/ui/label";
 const PAGE_SIZE = 1000;
 const UNASSIGNED = "unassigned";
 const CHART_COLORS = [
+<<<<<<< HEAD
   "#6366f1",
   "#06b6d4",
   "#10b981",
@@ -56,6 +61,18 @@ const AGE_GROUPS = [
   "55 o más",
   "Sin fecha válida",
 ] as const;
+=======
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+];
+const CHART_CONFIG = {
+  count: { label: "Registros", color: "var(--chart-1)" },
+} satisfies ChartConfig;
+const MAX_CHART_BARS = 8;
+>>>>>>> c07c827 (dashbord e interfaz)
 
 type DashboardFilters = {
   udo: string;
@@ -75,7 +92,10 @@ type DashboardRecord = {
   id_funcion: number | null;
   id_relacion_laboral: number | null;
   sexo: string | null;
+<<<<<<< HEAD
   fecha_nacimiento: string | null;
+=======
+>>>>>>> c07c827 (dashbord e interfaz)
 };
 
 type DashboardDistributions = [
@@ -86,7 +106,10 @@ type DashboardDistributions = [
   DistributionItem[],
   DistributionItem[],
   DistributionItem[],
+<<<<<<< HEAD
   DistributionItem[],
+=======
+>>>>>>> c07c827 (dashbord e interfaz)
 ];
 
 async function loadAllPages<T>(
@@ -125,11 +148,15 @@ async function loadDashboardData() {
         .range(from, to),
     ),
     loadAllPages((from, to) =>
+<<<<<<< HEAD
       supabase
         .from("personas")
         .select("id_persona,sexo,fecha_nacimiento")
         .order("id_persona")
         .range(from, to),
+=======
+      supabase.from("personas").select("id_persona,sexo").order("id_persona").range(from, to),
+>>>>>>> c07c827 (dashbord e interfaz)
     ),
     loadAllPages((from, to) =>
       supabase
@@ -182,12 +209,16 @@ async function loadDashboardData() {
     ),
   ]);
 
+<<<<<<< HEAD
   const personById = new Map(
     people.map((person) => [
       person.id_persona,
       { sexo: person.sexo, fecha_nacimiento: person.fecha_nacimiento },
     ]),
   );
+=======
+  const sexByPerson = new Map(people.map((person) => [person.id_persona, person.sexo]));
+>>>>>>> c07c827 (dashbord e interfaz)
   const udoById = new Map(udos.map((item) => [item.id_udo, item.descripcion]));
   const secretariaById = new Map(secretarias.map((item) => [item.id_secretaria, item]));
   const direccionById = new Map(direcciones.map((item) => [item.id_direccion, item]));
@@ -203,8 +234,12 @@ async function loadDashboardData() {
       id_sector: record.id_sector,
       id_funcion: record.id_funcion,
       id_relacion_laboral: record.id_relacion_laboral,
+<<<<<<< HEAD
       sexo: personById.get(record.id_persona)?.sexo ?? null,
       fecha_nacimiento: personById.get(record.id_persona)?.fecha_nacimiento ?? null,
+=======
+      sexo: sexByPerson.get(record.id_persona) ?? null,
+>>>>>>> c07c827 (dashbord e interfaz)
     })),
     people,
     udos,
@@ -249,6 +284,7 @@ function distribution(
   return [...counts.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
+<<<<<<< HEAD
 function ageGroup(dateOfBirth: string | null): string {
   if (!dateOfBirth) return "Sin fecha válida";
 
@@ -280,11 +316,16 @@ function ageGroup(dateOfBirth: string | null): string {
   return AGE_GROUPS[4];
 }
 
+=======
+>>>>>>> c07c827 (dashbord e interfaz)
 function useDashboardData() {
   return useQuery({
     queryKey: ["admin-dashboard"],
     queryFn: loadDashboardData,
+<<<<<<< HEAD
     refetchInterval: 30000,
+=======
+>>>>>>> c07c827 (dashbord e interfaz)
   });
 }
 
@@ -310,8 +351,13 @@ function DistributionCard({
 
   return (
     <Card>
+<<<<<<< HEAD
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-bold tracking-tight">{title}</CardTitle>
+=======
+      <CardHeader>
+        <CardTitle className="text-base">{title}</CardTitle>
+>>>>>>> c07c827 (dashbord e interfaz)
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
@@ -394,6 +440,7 @@ function DistributionCard({
             >
               <BarChart
                 data={chartItems}
+<<<<<<< HEAD
                 margin={{ top: 20, right: 12, bottom: 4, left: 0 }}
                 barCategoryGap={10}
               >
@@ -413,6 +460,14 @@ function DistributionCard({
                   }
                 />
                 <YAxis
+=======
+                layout="vertical"
+                margin={{ top: 4, right: 28, bottom: 4, left: 4 }}
+                barCategoryGap={10}
+              >
+                <CartesianGrid horizontal={false} stroke="var(--border)" strokeDasharray="3 3" />
+                <XAxis
+>>>>>>> c07c827 (dashbord e interfaz)
                   type="number"
                   axisLine={false}
                   tickLine={false}
@@ -420,6 +475,20 @@ function DistributionCard({
                   allowDecimals={false}
                   tickFormatter={(value: number) => value.toLocaleString("es-AR")}
                 />
+<<<<<<< HEAD
+=======
+                <YAxis
+                  type="category"
+                  dataKey="label"
+                  width={112}
+                  axisLine={false}
+                  tickLine={false}
+                  tickMargin={8}
+                  tickFormatter={(value: string) =>
+                    value.length > 17 ? `${value.slice(0, 16)}…` : value
+                  }
+                />
+>>>>>>> c07c827 (dashbord e interfaz)
                 <ChartTooltip
                   cursor={{ fill: "var(--muted)", opacity: 0.55 }}
                   content={
@@ -436,6 +505,7 @@ function DistributionCard({
                 <Bar
                   dataKey="count"
                   fill="var(--color-count)"
+<<<<<<< HEAD
                   radius={[6, 6, 0, 0]}
                   maxBarSize={38}
                   isAnimationActive
@@ -446,6 +516,15 @@ function DistributionCard({
                   <LabelList
                     dataKey="count"
                     position="top"
+=======
+                  radius={[0, 6, 6, 0]}
+                  maxBarSize={24}
+                  isAnimationActive
+                >
+                  <LabelList
+                    dataKey="count"
+                    position="right"
+>>>>>>> c07c827 (dashbord e interfaz)
                     className="fill-foreground text-xs"
                     formatter={(value: number) => value.toLocaleString("es-AR")}
                   />
@@ -490,7 +569,11 @@ function FilterSelect({
       <Label htmlFor={id}>{label}</Label>
       <select
         id={id}
+<<<<<<< HEAD
         className="h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+=======
+        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+>>>>>>> c07c827 (dashbord e interfaz)
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
@@ -506,6 +589,7 @@ function FilterSelect({
   );
 }
 
+<<<<<<< HEAD
 function StatCard({
   label,
   value,
@@ -540,6 +624,8 @@ function StatCard({
   );
 }
 
+=======
+>>>>>>> c07c827 (dashbord e interfaz)
 export function AdminDashboard() {
   const dashboard = useDashboardData();
   const [filters, setFilters] = useState<DashboardFilters>({
@@ -611,7 +697,10 @@ export function AdminDashboard() {
     if (!data) return null;
     const lookup = data.lookups;
     const bySex = new Map<string, DistributionItem>();
+<<<<<<< HEAD
     const byAge = new Map<string, DistributionItem>();
+=======
+>>>>>>> c07c827 (dashbord e interfaz)
     for (const record of filteredRecords) {
       const normalized = (record.sexo ?? "").trim().toLocaleUpperCase("es-AR");
       const label =
@@ -623,11 +712,14 @@ export function AdminDashboard() {
       const current = bySex.get(label);
       if (current) current.count += 1;
       else bySex.set(label, { id: label, label, count: 1 });
+<<<<<<< HEAD
 
       const ageLabel = ageGroup(record.fecha_nacimiento);
       const age = byAge.get(ageLabel);
       if (age) age.count += 1;
       else byAge.set(ageLabel, { id: ageLabel, label: ageLabel, count: 1 });
+=======
+>>>>>>> c07c827 (dashbord e interfaz)
     }
 
     const result: DashboardDistributions = [
@@ -672,10 +764,13 @@ export function AdminDashboard() {
       distribution(filteredRecords, (record) => record.id_funcion, lookup.funcionById),
       distribution(filteredRecords, (record) => record.id_relacion_laboral, lookup.relacionById),
       [...bySex.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)),
+<<<<<<< HEAD
       AGE_GROUPS.flatMap((label) => {
         const item = byAge.get(label);
         return item ? [item] : [];
       }),
+=======
+>>>>>>> c07c827 (dashbord e interfaz)
     ];
     return result;
   }, [data, filteredRecords]);
@@ -690,6 +785,7 @@ export function AdminDashboard() {
   }
 
   const total = filteredRecords.length;
+<<<<<<< HEAD
   const udoCount = distributions?.[0].filter((item) => item.id !== UNASSIGNED).length ?? 0;
   const sectorCount = distributions?.[3].filter((item) => item.id !== UNASSIGNED).length ?? 0;
   const unassignedSectors = distributions?.[3].find((item) => item.id === UNASSIGNED)?.count ?? 0;
@@ -706,31 +802,61 @@ export function AdminDashboard() {
             Dashboard de personal
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+=======
+
+  return (
+    <div className="mx-auto w-full max-w-screen-2xl space-y-6 p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="mb-3 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+            <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.6} />
+            Administración
+          </div>
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            Dashboard de personal
+          </h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
+>>>>>>> c07c827 (dashbord e interfaz)
             Distribución global o por estructura organizativa.
           </p>
         </div>
         <Button
           variant="outline"
+<<<<<<< HEAD
           className="w-full shrink-0 sm:w-auto"
           onClick={() => void dashboard.refetch()}
           disabled={dashboard.isFetching}
         >
           <RefreshCw className={`h-4 w-4 ${dashboard.isFetching ? "animate-spin" : ""}`} />
+=======
+          onClick={() => void dashboard.refetch()}
+          disabled={dashboard.isFetching}
+        >
+          <RefreshCw className={`mr-2 h-4 w-4 ${dashboard.isFetching ? "animate-spin" : ""}`} />
+>>>>>>> c07c827 (dashbord e interfaz)
           Actualizar
         </Button>
       </div>
 
       <Card>
         <CardHeader>
+<<<<<<< HEAD
           <CardTitle className="flex items-center gap-2 text-base font-bold">
             <SlidersHorizontal className="h-4 w-4 text-primary" strokeWidth={1.8} />
             Ámbito del informe
           </CardTitle>
+=======
+          <CardTitle className="text-base">Ámbito del informe</CardTitle>
+>>>>>>> c07c827 (dashbord e interfaz)
           <CardDescription>
             Dejá los filtros en “Todas” para ver el total global. Los niveles se filtran en orden.
           </CardDescription>
         </CardHeader>
+<<<<<<< HEAD
         <CardContent className="grid gap-4 pt-2 sm:grid-cols-2 lg:grid-cols-4">
+=======
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+>>>>>>> c07c827 (dashbord e interfaz)
           <FilterSelect
             id="dashboard-udo"
             label="UDO"
@@ -770,24 +896,35 @@ export function AdminDashboard() {
 
       {dashboard.isPending ? (
         <Card>
+<<<<<<< HEAD
           <CardContent className="py-14 text-center text-sm text-muted-foreground">
+=======
+          <CardContent className="py-12 text-center text-sm text-muted-foreground">
+>>>>>>> c07c827 (dashbord e interfaz)
             Cargando estadísticas…
           </CardContent>
         </Card>
       ) : dashboard.error ? (
         <Card>
           <CardContent className="py-8">
+<<<<<<< HEAD
             <div className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
               <div>
                 <p className="font-semibold">No se pudieron cargar las estadísticas.</p>
                 <p className="mt-1 text-muted-foreground">{dashboard.error.message}</p>
               </div>
+=======
+            <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm">
+              <p className="font-medium">No se pudieron cargar las estadísticas.</p>
+              <p className="mt-1 text-muted-foreground">{dashboard.error.message}</p>
+>>>>>>> c07c827 (dashbord e interfaz)
             </div>
           </CardContent>
         </Card>
       ) : (
         <>
+<<<<<<< HEAD
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               label="Total de legajos"
@@ -818,6 +955,21 @@ export function AdminDashboard() {
               tone="bg-amber-500/10 text-amber-600 dark:text-amber-400"
             />
           </div>
+=======
+          <Card>
+            <CardContent className="flex items-center gap-4 py-5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <UsersRound className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Registros en el ámbito seleccionado</p>
+                <p className="text-2xl font-semibold tabular-nums">
+                  {total.toLocaleString("es-AR")}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+>>>>>>> c07c827 (dashbord e interfaz)
           {distributions && (
             <div className="grid gap-4 xl:grid-cols-2">
               <DistributionCard
@@ -863,12 +1015,15 @@ export function AdminDashboard() {
                 total={total}
                 chartType="donut"
               />
+<<<<<<< HEAD
               <DistributionCard
                 title="Registros por grupo de edad"
                 description="Edad calculada a partir de la fecha de nacimiento registrada"
                 items={distributions[7]}
                 total={total}
               />
+=======
+>>>>>>> c07c827 (dashbord e interfaz)
             </div>
           )}
         </>

@@ -190,9 +190,15 @@ function UserManagement() {
               No hay usuarios registrados.
             </p>
           ) : (
+<<<<<<< HEAD
             <div className="overflow-x-auto rounded-2xl border border-border/60">
               <table className="w-full min-w-[780px] text-left text-sm">
                 <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+=======
+            <div className="overflow-x-auto rounded-md border">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <thead className="bg-muted/50 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+>>>>>>> c07c827 (dashbord e interfaz)
                   <tr>
                     <th scope="col" className="px-5 py-3.5">
                       Email
@@ -255,6 +261,7 @@ function UserManagement() {
                       <td className="px-5 py-3.5 text-xs text-muted-foreground">
                         {new Date(user.createdAt).toLocaleDateString("es-AR")}
                       </td>
+<<<<<<< HEAD
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-2">
                           <Button
@@ -282,6 +289,33 @@ function UserManagement() {
                             <Trash2 className="h-4 w-4" /> Eliminar
                           </Button>
                         </div>
+=======
+                      <td className="px-4 py-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setPasswordTarget(user);
+                            setTemporaryPassword("");
+                          }}
+                        >
+                          <KeyRound className="mr-2 h-4 w-4" /> Contraseña temporal
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="ml-2 border-destructive/40 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                          disabled={user.isCurrentUser || deleteMutation.isPending}
+                          title={
+                            user.isCurrentUser
+                              ? "No podés eliminar la cuenta con la que iniciaste sesión"
+                              : `Eliminar la cuenta de ${user.email}`
+                          }
+                          onClick={() => setDeleteTarget(user)}
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                        </Button>
+>>>>>>> c07c827 (dashbord e interfaz)
                       </td>
                     </tr>
                   ))}
