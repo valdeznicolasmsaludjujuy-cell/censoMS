@@ -73,10 +73,6 @@ function AuthPage() {
   }
 
   return (
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="surface-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
@@ -109,7 +105,6 @@ function AuthPage() {
             </h2>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-sidebar-foreground/60">
               Centralizá altas, controles y reportes del personal en una sola plataforma.
-<<<<<<< HEAD
             </p>
           </div>
 
@@ -134,49 +129,6 @@ function AuthPage() {
           <p className="relative text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/35">
             Uso interno · Ministerio de Salud
           </p>
-=======
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-3xl border border-border/70 bg-card/95 p-6 shadow-2xl shadow-primary/5 backdrop-blur sm:p-8">
-        <div className="mb-7 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
-              Ministerio de Salud
-            </p>
-            <h1 className="mt-2 text-xl font-semibold tracking-tight text-foreground">
-              Gestión de Personal
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Ingresá con tu cuenta institucional.
-            </p>
-          </div>
-          <ThemeToggle className="border border-border bg-background text-foreground hover:bg-accent" />
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-            </p>
-          </div>
-
-          <div className="relative space-y-3">
-            {[
-              { icon: ShieldCheck, text: "Acceso seguro por roles" },
-              { icon: CheckSquare, text: "Legajos siempre actualizados" },
-              { icon: ChartBar, text: "Reportes en tiempo real" },
-            ].map(({ icon: Icon, text }) => (
-              <div
-                key={text}
-                className="flex items-center gap-3 text-sm text-sidebar-foreground/75"
-              >
-                <div className="grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-white/5">
-                  <Icon className="h-4 w-4" />
-                </div>
-                {text}
-              </div>
-            ))}
-          </div>
-
-          <p className="relative text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/35">
-            Uso interno · Ministerio de Salud
-          </p>
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
         </div>
 
         <div className="relative p-6 sm:p-8 md:p-10">

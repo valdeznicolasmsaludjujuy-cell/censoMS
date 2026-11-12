@@ -1,9 +1,5 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 import {
   AlertCircle,
   BarChart3,
@@ -14,12 +10,6 @@ import {
   UsersRound,
   type LucideIcon,
 } from "lucide-react";
-<<<<<<< HEAD
-=======
-import { BarChart3, RefreshCw, UsersRound } from "lucide-react";
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 import {
   Bar,
   BarChart,
@@ -45,10 +35,6 @@ import { Label } from "@/components/ui/label";
 const PAGE_SIZE = 1000;
 const UNASSIGNED = "unassigned";
 const CHART_COLORS = [
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
   "#6366f1",
   "#06b6d4",
   "#10b981",
@@ -58,7 +44,6 @@ const CHART_COLORS = [
   "#14b8a6",
   "#3b82f6",
 ] as const;
-<<<<<<< HEAD
 const CHART_CONFIG = {
   count: { label: "Registros", color: CHART_COLORS[0] },
 } satisfies ChartConfig;
@@ -71,31 +56,6 @@ const AGE_GROUPS = [
   "55 o más",
   "Sin fecha válida",
 ] as const;
-=======
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-];
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
-const CHART_CONFIG = {
-  count: { label: "Registros", color: CHART_COLORS[0] },
-} satisfies ChartConfig;
-const MAX_CHART_BARS = 8;
-<<<<<<< HEAD
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-const AGE_GROUPS = [
-  "Menos de 25",
-  "25 a 34",
-  "35 a 44",
-  "45 a 54",
-  "55 o más",
-  "Sin fecha válida",
-] as const;
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 
 type DashboardFilters = {
   udo: string;
@@ -115,14 +75,7 @@ type DashboardRecord = {
   id_funcion: number | null;
   id_relacion_laboral: number | null;
   sexo: string | null;
-<<<<<<< HEAD
-<<<<<<< HEAD
   fecha_nacimiento: string | null;
-=======
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-  fecha_nacimiento: string | null;
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 };
 
 type DashboardDistributions = [
@@ -133,14 +86,7 @@ type DashboardDistributions = [
   DistributionItem[],
   DistributionItem[],
   DistributionItem[],
-<<<<<<< HEAD
-<<<<<<< HEAD
   DistributionItem[],
-=======
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-  DistributionItem[],
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 ];
 
 async function loadAllPages<T>(
@@ -179,21 +125,11 @@ async function loadDashboardData() {
         .range(from, to),
     ),
     loadAllPages((from, to) =>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
       supabase
         .from("personas")
         .select("id_persona,sexo,fecha_nacimiento")
         .order("id_persona")
         .range(from, to),
-<<<<<<< HEAD
-=======
-      supabase.from("personas").select("id_persona,sexo").order("id_persona").range(from, to),
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
     ),
     loadAllPages((from, to) =>
       supabase
@@ -246,22 +182,12 @@ async function loadDashboardData() {
     ),
   ]);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
   const personById = new Map(
     people.map((person) => [
       person.id_persona,
       { sexo: person.sexo, fecha_nacimiento: person.fecha_nacimiento },
     ]),
   );
-<<<<<<< HEAD
-=======
-  const sexByPerson = new Map(people.map((person) => [person.id_persona, person.sexo]));
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
   const udoById = new Map(udos.map((item) => [item.id_udo, item.descripcion]));
   const secretariaById = new Map(secretarias.map((item) => [item.id_secretaria, item]));
   const direccionById = new Map(direcciones.map((item) => [item.id_direccion, item]));
@@ -277,17 +203,8 @@ async function loadDashboardData() {
       id_sector: record.id_sector,
       id_funcion: record.id_funcion,
       id_relacion_laboral: record.id_relacion_laboral,
-<<<<<<< HEAD
-<<<<<<< HEAD
       sexo: personById.get(record.id_persona)?.sexo ?? null,
       fecha_nacimiento: personById.get(record.id_persona)?.fecha_nacimiento ?? null,
-=======
-      sexo: sexByPerson.get(record.id_persona) ?? null,
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-      sexo: personById.get(record.id_persona)?.sexo ?? null,
-      fecha_nacimiento: personById.get(record.id_persona)?.fecha_nacimiento ?? null,
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
     })),
     people,
     udos,
@@ -332,10 +249,6 @@ function distribution(
   return [...counts.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 function ageGroup(dateOfBirth: string | null): string {
   if (!dateOfBirth) return "Sin fecha válida";
 
@@ -367,23 +280,11 @@ function ageGroup(dateOfBirth: string | null): string {
   return AGE_GROUPS[4];
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 function useDashboardData() {
   return useQuery({
     queryKey: ["admin-dashboard"],
     queryFn: loadDashboardData,
-<<<<<<< HEAD
-<<<<<<< HEAD
     refetchInterval: 30000,
-=======
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-    refetchInterval: 30000,
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
   });
 }
 
@@ -409,18 +310,8 @@ function DistributionCard({
 
   return (
     <Card>
-<<<<<<< HEAD
-<<<<<<< HEAD
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-bold tracking-tight">{title}</CardTitle>
-=======
-      <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base font-bold tracking-tight">{title}</CardTitle>
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
@@ -503,8 +394,6 @@ function DistributionCard({
             >
               <BarChart
                 data={chartItems}
-<<<<<<< HEAD
-<<<<<<< HEAD
                 margin={{ top: 20, right: 12, bottom: 4, left: 0 }}
                 barCategoryGap={10}
               >
@@ -524,34 +413,6 @@ function DistributionCard({
                   }
                 />
                 <YAxis
-=======
-                layout="vertical"
-                margin={{ top: 4, right: 28, bottom: 4, left: 4 }}
-=======
-                margin={{ top: 20, right: 12, bottom: 4, left: 0 }}
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
-                barCategoryGap={10}
-              >
-                <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
-                <XAxis
-<<<<<<< HEAD
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-                  type="category"
-                  dataKey="label"
-                  axisLine={false}
-                  tickLine={false}
-                  tickMargin={8}
-                  interval={0}
-                  angle={-25}
-                  textAnchor="end"
-                  height={72}
-                  tickFormatter={(value: string) =>
-                    value.length > 14 ? `${value.slice(0, 13)}…` : value
-                  }
-                />
-                <YAxis
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
                   type="number"
                   axisLine={false}
                   tickLine={false}
@@ -559,23 +420,6 @@ function DistributionCard({
                   allowDecimals={false}
                   tickFormatter={(value: number) => value.toLocaleString("es-AR")}
                 />
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-                <YAxis
-                  type="category"
-                  dataKey="label"
-                  width={112}
-                  axisLine={false}
-                  tickLine={false}
-                  tickMargin={8}
-                  tickFormatter={(value: string) =>
-                    value.length > 17 ? `${value.slice(0, 16)}…` : value
-                  }
-                />
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
                 <ChartTooltip
                   cursor={{ fill: "var(--muted)", opacity: 0.55 }}
                   content={
@@ -592,8 +436,6 @@ function DistributionCard({
                 <Bar
                   dataKey="count"
                   fill="var(--color-count)"
-<<<<<<< HEAD
-<<<<<<< HEAD
                   radius={[6, 6, 0, 0]}
                   maxBarSize={38}
                   isAnimationActive
@@ -604,26 +446,6 @@ function DistributionCard({
                   <LabelList
                     dataKey="count"
                     position="top"
-=======
-                  radius={[0, 6, 6, 0]}
-                  maxBarSize={24}
-=======
-                  radius={[6, 6, 0, 0]}
-                  maxBarSize={38}
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
-                  isAnimationActive
-                >
-                  {chartItems.map((item, index) => (
-                    <Cell key={item.id} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                  ))}
-                  <LabelList
-                    dataKey="count"
-<<<<<<< HEAD
-                    position="right"
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-                    position="top"
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
                     className="fill-foreground text-xs"
                     formatter={(value: number) => value.toLocaleString("es-AR")}
                   />
@@ -668,15 +490,7 @@ function FilterSelect({
       <Label htmlFor={id}>{label}</Label>
       <select
         id={id}
-<<<<<<< HEAD
-<<<<<<< HEAD
         className="h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
-=======
-        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-        className="h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
@@ -692,10 +506,6 @@ function FilterSelect({
   );
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 function StatCard({
   label,
   value,
@@ -730,11 +540,6 @@ function StatCard({
   );
 }
 
-<<<<<<< HEAD
-=======
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 export function AdminDashboard() {
   const dashboard = useDashboardData();
   const [filters, setFilters] = useState<DashboardFilters>({
@@ -806,14 +611,7 @@ export function AdminDashboard() {
     if (!data) return null;
     const lookup = data.lookups;
     const bySex = new Map<string, DistributionItem>();
-<<<<<<< HEAD
-<<<<<<< HEAD
     const byAge = new Map<string, DistributionItem>();
-=======
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-    const byAge = new Map<string, DistributionItem>();
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
     for (const record of filteredRecords) {
       const normalized = (record.sexo ?? "").trim().toLocaleUpperCase("es-AR");
       const label =
@@ -825,20 +623,11 @@ export function AdminDashboard() {
       const current = bySex.get(label);
       if (current) current.count += 1;
       else bySex.set(label, { id: label, label, count: 1 });
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 
       const ageLabel = ageGroup(record.fecha_nacimiento);
       const age = byAge.get(ageLabel);
       if (age) age.count += 1;
       else byAge.set(ageLabel, { id: ageLabel, label: ageLabel, count: 1 });
-<<<<<<< HEAD
-=======
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
     }
 
     const result: DashboardDistributions = [
@@ -883,19 +672,10 @@ export function AdminDashboard() {
       distribution(filteredRecords, (record) => record.id_funcion, lookup.funcionById),
       distribution(filteredRecords, (record) => record.id_relacion_laboral, lookup.relacionById),
       [...bySex.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)),
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
       AGE_GROUPS.flatMap((label) => {
         const item = byAge.get(label);
         return item ? [item] : [];
       }),
-<<<<<<< HEAD
-=======
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
     ];
     return result;
   }, [data, filteredRecords]);
@@ -910,8 +690,6 @@ export function AdminDashboard() {
   }
 
   const total = filteredRecords.length;
-<<<<<<< HEAD
-<<<<<<< HEAD
   const udoCount = distributions?.[0].filter((item) => item.id !== UNASSIGNED).length ?? 0;
   const sectorCount = distributions?.[3].filter((item) => item.id !== UNASSIGNED).length ?? 0;
   const unassignedSectors = distributions?.[3].find((item) => item.id === UNASSIGNED)?.count ?? 0;
@@ -928,88 +706,31 @@ export function AdminDashboard() {
             Dashboard de personal
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
-=======
-=======
-  const udoCount = distributions?.[0].filter((item) => item.id !== UNASSIGNED).length ?? 0;
-  const sectorCount = distributions?.[3].filter((item) => item.id !== UNASSIGNED).length ?? 0;
-  const unassignedSectors = distributions?.[3].find((item) => item.id === UNASSIGNED)?.count ?? 0;
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
-
-  return (
-    <div className="mx-auto w-full max-w-screen-2xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
-            <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.8} />
-            Administración
-          </div>
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Dashboard de personal
-          </h1>
-<<<<<<< HEAD
-          <p className="mt-1.5 text-sm text-muted-foreground">
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
             Distribución global o por estructura organizativa.
           </p>
         </div>
         <Button
           variant="outline"
-<<<<<<< HEAD
-<<<<<<< HEAD
           className="w-full shrink-0 sm:w-auto"
           onClick={() => void dashboard.refetch()}
           disabled={dashboard.isFetching}
         >
           <RefreshCw className={`h-4 w-4 ${dashboard.isFetching ? "animate-spin" : ""}`} />
-=======
-          onClick={() => void dashboard.refetch()}
-          disabled={dashboard.isFetching}
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${dashboard.isFetching ? "animate-spin" : ""}`} />
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-          className="w-full shrink-0 sm:w-auto"
-          onClick={() => void dashboard.refetch()}
-          disabled={dashboard.isFetching}
-        >
-          <RefreshCw className={`h-4 w-4 ${dashboard.isFetching ? "animate-spin" : ""}`} />
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
           Actualizar
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
           <CardTitle className="flex items-center gap-2 text-base font-bold">
             <SlidersHorizontal className="h-4 w-4 text-primary" strokeWidth={1.8} />
             Ámbito del informe
           </CardTitle>
-<<<<<<< HEAD
-=======
-          <CardTitle className="text-base">Ámbito del informe</CardTitle>
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
           <CardDescription>
             Dejá los filtros en “Todas” para ver el total global. Los niveles se filtran en orden.
           </CardDescription>
         </CardHeader>
-<<<<<<< HEAD
-<<<<<<< HEAD
         <CardContent className="grid gap-4 pt-2 sm:grid-cols-2 lg:grid-cols-4">
-=======
-        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-        <CardContent className="grid gap-4 pt-2 sm:grid-cols-2 lg:grid-cols-4">
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
           <FilterSelect
             id="dashboard-udo"
             label="UDO"
@@ -1049,48 +770,24 @@ export function AdminDashboard() {
 
       {dashboard.isPending ? (
         <Card>
-<<<<<<< HEAD
-<<<<<<< HEAD
           <CardContent className="py-14 text-center text-sm text-muted-foreground">
-=======
-          <CardContent className="py-12 text-center text-sm text-muted-foreground">
->>>>>>> c07c827 (dashbord e interfaz)
-=======
-          <CardContent className="py-14 text-center text-sm text-muted-foreground">
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
             Cargando estadísticas…
           </CardContent>
         </Card>
       ) : dashboard.error ? (
         <Card>
           <CardContent className="py-8">
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
             <div className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
               <div>
                 <p className="font-semibold">No se pudieron cargar las estadísticas.</p>
                 <p className="mt-1 text-muted-foreground">{dashboard.error.message}</p>
               </div>
-<<<<<<< HEAD
-=======
-            <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm">
-              <p className="font-medium">No se pudieron cargar las estadísticas.</p>
-              <p className="mt-1 text-muted-foreground">{dashboard.error.message}</p>
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
             </div>
           </CardContent>
         </Card>
       ) : (
         <>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               label="Total de legajos"
@@ -1121,24 +818,6 @@ export function AdminDashboard() {
               tone="bg-amber-500/10 text-amber-600 dark:text-amber-400"
             />
           </div>
-<<<<<<< HEAD
-=======
-          <Card>
-            <CardContent className="flex items-center gap-4 py-5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <UsersRound className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Registros en el ámbito seleccionado</p>
-                <p className="text-2xl font-semibold tabular-nums">
-                  {total.toLocaleString("es-AR")}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
           {distributions && (
             <div className="grid gap-4 xl:grid-cols-2">
               <DistributionCard
@@ -1184,21 +863,12 @@ export function AdminDashboard() {
                 total={total}
                 chartType="donut"
               />
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
               <DistributionCard
                 title="Registros por grupo de edad"
                 description="Edad calculada a partir de la fecha de nacimiento registrada"
                 items={distributions[7]}
                 total={total}
               />
-<<<<<<< HEAD
-=======
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
             </div>
           )}
         </>

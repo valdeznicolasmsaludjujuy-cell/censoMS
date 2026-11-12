@@ -146,10 +146,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
         </div>
         <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
           <div className="relative w-full sm:w-72">
-            <MagnifyingGlass
-              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70"
-             
-            />
+            <MagnifyingGlass className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
             <Input
               className="pl-10"
               placeholder="Buscar nombre, DNI o CUIL"
@@ -169,10 +166,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
               aria-label="Actualizar listado"
               title="Actualizar listado"
             >
-              <ArrowsClockwise
-                className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
-               
-              />
+              <ArrowsClockwise className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
             </Button>
             {!controlado && (
               <Button onClick={() => setCreateOpen(true)}>
@@ -183,10 +177,6 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
           </div>
         </div>
       </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/90 shadow-soft backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-4 sm:px-6">
           <div className="flex items-center gap-3">
@@ -203,18 +193,6 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
                 {total} {total === 1 ? "registro" : "registros"}
               </p>
             </div>
-<<<<<<< HEAD
-=======
-      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
-          <div>
-            <h2 className="text-sm font-semibold">Listado de personas</h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {total} {total === 1 ? "registro" : "registros"}
-            </p>
->>>>>>> c07c827 (dashbord e interfaz)
-=======
->>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
           </div>
           <span
             className={
@@ -226,8 +204,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
           >
             <span
               className={
-                "h-1.5 w-1.5 rounded-full " +
-                (controlado ? "bg-emerald-500" : "bg-amber-500")
+                "h-1.5 w-1.5 rounded-full " + (controlado ? "bg-emerald-500" : "bg-amber-500")
               }
             />
             {controlado ? "Revisados" : "Pendientes"}
