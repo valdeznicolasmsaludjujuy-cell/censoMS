@@ -29,6 +29,15 @@ Solo los usuarios con rol `admin` pueden crear cuentas, asignar roles o modifica
 `carga` puede agregar y completar registros de toda la planilla; `consulta` tiene acceso de solo
 lectura. Las cuentas creadas reciben una contraseña temporal y deben cambiarla en su primer ingreso.
 
+El **Dashboard** está disponible para administradores desde el menú principal. Muestra el total de
+legajos y su distribución por UDO, secretaría, dirección, sector, función, relación laboral y sexo.
+Los filtros UDO → secretaría → dirección → sector permiten consultar un ámbito específico; sin
+filtros, los reportes son globales. Los conteos incluyen los legajos sin datos de catálogo como
+“Sin asignar” y la opción **Actualizar** vuelve a consultar la base.
+
+La aplicación ofrece tema claro y oscuro desde el botón de sol/luna del menú. La selección se guarda
+en el navegador; si todavía no elegiste un tema, se usa la preferencia del sistema operativo.
+
 Aplicá `drizzle/migrations/0007_gestion_de_usuarios.sql` en Supabase SQL Editor después de contar
 con las tablas y funciones de roles existentes. No vuelvas a ejecutar la migración inicial sobre
 una base ya configurada.
