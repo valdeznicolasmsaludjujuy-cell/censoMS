@@ -191,6 +191,7 @@ function UserManagement() {
             </p>
           ) : (
 <<<<<<< HEAD
+<<<<<<< HEAD
             <div className="overflow-x-auto rounded-2xl border border-border/60">
               <table className="w-full min-w-[780px] text-left text-sm">
                 <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -199,6 +200,11 @@ function UserManagement() {
               <table className="w-full min-w-[760px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs font-medium uppercase tracking-wide text-muted-foreground">
 >>>>>>> c07c827 (dashbord e interfaz)
+=======
+            <div className="overflow-x-auto rounded-2xl border border-border/60">
+              <table className="w-full min-w-[780px] text-left text-sm">
+                <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
                   <tr>
                     <th scope="col" className="px-5 py-3.5">
                       Email
@@ -262,6 +268,9 @@ function UserManagement() {
                         {new Date(user.createdAt).toLocaleDateString("es-AR")}
                       </td>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-2">
                           <Button
@@ -289,6 +298,7 @@ function UserManagement() {
                             <Trash2 className="h-4 w-4" /> Eliminar
                           </Button>
                         </div>
+<<<<<<< HEAD
 =======
                       <td className="px-4 py-3">
                         <Button
@@ -316,6 +326,8 @@ function UserManagement() {
                           <Trash2 className="mr-2 h-4 w-4" /> Eliminar
                         </Button>
 >>>>>>> c07c827 (dashbord e interfaz)
+=======
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
                       </td>
                     </tr>
                   ))}

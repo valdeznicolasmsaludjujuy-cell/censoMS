@@ -53,10 +53,14 @@ function ChangePasswordPage() {
 
   return (
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="surface-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
       <div className="glass-panel relative w-full max-w-md rounded-[2rem] border border-border/60 p-6 shadow-lift sm:p-8">
+<<<<<<< HEAD
         <div className="flex items-start justify-between gap-4">
           <div className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-gradient text-primary-foreground shadow-glow">
             <ShieldCheck className="h-6 w-6" />
@@ -81,21 +85,36 @@ function ChangePasswordPage() {
 =======
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md rounded-3xl border border-border/70 bg-card/95 p-6 shadow-2xl shadow-primary/5 backdrop-blur sm:p-8">
+=======
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
         <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">
-              Ministerio de Salud
-            </p>
-            <h1 className="mt-2 text-xl font-semibold tracking-tight">
-              Creá tu contraseña personal
-            </h1>
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-gradient text-primary-foreground shadow-glow">
+            <ShieldCheck className="h-6 w-6" />
           </div>
           <ThemeToggle className="border border-border bg-background text-foreground hover:bg-accent" />
         </div>
+<<<<<<< HEAD
         <p className="mt-3 text-sm text-muted-foreground">
           La contraseña temporal de {email} debe reemplazarse antes de continuar.
         </p>
 >>>>>>> c07c827 (dashbord e interfaz)
+=======
+
+        <div className="mt-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+            Ministerio de Salud
+          </p>
+          <h1 className="mt-2 text-2xl font-extrabold tracking-tight">
+            Creá tu contraseña personal
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            La contraseña temporal de{" "}
+            <span className="font-semibold text-foreground">{email}</span>{" "}
+            debe reemplazarse antes de continuar.
+          </p>
+        </div>
+
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
         <form onSubmit={submit} className="mt-6 space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="new-password">Nueva contraseña</Label>

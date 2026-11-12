@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { Moon, Sun } from "@phosphor-icons/react";
 =======
 import { Moon, Sun } from "lucide-react";
 >>>>>>> c07c827 (dashbord e interfaz)
+=======
+import { Moon, Sun } from "@phosphor-icons/react";
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -45,10 +49,14 @@ export function ThemeToggle({ className }: { className?: string }) {
       className={cn("shrink-0 rounded-xl", className)}
     >
 <<<<<<< HEAD
+<<<<<<< HEAD
       <Icon className="h-4 w-4" />
 =======
       <Icon className="h-4 w-4" strokeWidth={1.8} />
 >>>>>>> c07c827 (dashbord e interfaz)
+=======
+      <Icon className="h-4 w-4" />
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
     </Button>
   );
 }

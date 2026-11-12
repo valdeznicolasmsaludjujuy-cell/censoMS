@@ -74,6 +74,9 @@ function AuthPage() {
 
   return (
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
       <div className="surface-grid pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
 
@@ -106,6 +109,7 @@ function AuthPage() {
             </h2>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-sidebar-foreground/60">
               Centralizá altas, controles y reportes del personal en una sola plataforma.
+<<<<<<< HEAD
             </p>
           </div>
 
@@ -147,6 +151,32 @@ function AuthPage() {
           </div>
           <ThemeToggle className="border border-border bg-background text-foreground hover:bg-accent" />
 >>>>>>> c07c827 (dashbord e interfaz)
+=======
+            </p>
+          </div>
+
+          <div className="relative space-y-3">
+            {[
+              { icon: ShieldCheck, text: "Acceso seguro por roles" },
+              { icon: CheckSquare, text: "Legajos siempre actualizados" },
+              { icon: ChartBar, text: "Reportes en tiempo real" },
+            ].map(({ icon: Icon, text }) => (
+              <div
+                key={text}
+                className="flex items-center gap-3 text-sm text-sidebar-foreground/75"
+              >
+                <div className="grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-white/5">
+                  <Icon className="h-4 w-4" />
+                </div>
+                {text}
+              </div>
+            ))}
+          </div>
+
+          <p className="relative text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/35">
+            Uso interno · Ministerio de Salud
+          </p>
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
         </div>
 
         <div className="relative p-6 sm:p-8 md:p-10">

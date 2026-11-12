@@ -184,6 +184,9 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
         </div>
       </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/90 shadow-soft backdrop-blur-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-4 sm:px-6">
           <div className="flex items-center gap-3">
@@ -200,6 +203,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
                 {total} {total === 1 ? "registro" : "registros"}
               </p>
             </div>
+<<<<<<< HEAD
 =======
       <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
@@ -209,6 +213,8 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
               {total} {total === 1 ? "registro" : "registros"}
             </p>
 >>>>>>> c07c827 (dashbord e interfaz)
+=======
+>>>>>>> 97bc840 (Modificacion dashboard  y tema oscuro)
           </div>
           <span
             className={
