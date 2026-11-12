@@ -1,16 +1,16 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  AlertCircle,
-  ClipboardCheck,
-  ClipboardList,
-  Pencil,
+  ArrowsClockwise,
+  CheckSquare,
+  ClipboardText,
+  MagnifyingGlass,
+  PencilSimple,
   Plus,
-  RefreshCw,
-  Search,
-  Trash2,
-  UsersRound,
-} from "lucide-react";
+  Trash,
+  UsersThree,
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,21 @@ import {
 
 const PAGE = 20;
 
+const selectCls =
+  "h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50";
+
+function initialsOf(name: string) {
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join("")
+      .toLocaleUpperCase("es-AR") || "?"
+  );
+}
+
 export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: string }) {
   const queryClient = useQueryClient();
   const adminRole = useQuery({
@@ -58,9 +73,10 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: ["planilla", controlado, page, q],
     placeholderData: keepPreviousData,
+    refetchInterval: 15000,
     queryFn: async () => {
       let s = supabase
         .from("v_planilla")
@@ -73,7 +89,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
         s = s.or(`apellido_nombre.ilike.%${t}%,dni.ilike.%${t}%,cuil.ilike.%${t}%`);
       }
       const { data, count, error } = await s
-        .order("id_legajo")
+        .order("id_legajo", { ascending: false })
         .range(page * PAGE, page * PAGE + PAGE - 1);
       if (error) throw error;
       return { rows: data ?? [], count: count ?? 0 };
@@ -111,31 +127,31 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
 
   return (
     <div className="mx-auto w-full max-w-screen-2xl p-4 sm:p-6 lg:p-8">
-      <div className="mb-6 flex flex-col gap-5 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-6 flex flex-col gap-5 sm:mb-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="mb-3 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
             {controlado ? (
-              <ClipboardCheck className="h-3.5 w-3.5" strokeWidth={1.6} />
+              <CheckSquare className="h-3.5 w-3.5" />
             ) : (
-              <ClipboardList className="h-3.5 w-3.5" strokeWidth={1.6} />
+              <ClipboardText className="h-3.5 w-3.5" />
             )}
             Gestión de personal
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{titulo}</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{titulo}</h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
             {controlado
               ? "Personas cuyos datos ya fueron revisados."
               : "Revisá y completá la información del personal."}
           </p>
         </div>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <div className="relative w-full sm:w-64">
-            <Search
-              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-              strokeWidth={1.6}
+        <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+          <div className="relative w-full sm:w-72">
+            <MagnifyingGlass
+              className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70"
+             
             />
             <Input
-              className="h-10 rounded-md border-border bg-card pl-9 shadow-none"
+              className="pl-10"
               placeholder="Buscar nombre, DNI o CUIL"
               value={q}
               onChange={(e) => {
@@ -145,30 +161,66 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
               aria-label="Buscar por nombre, DNI o CUIL"
             />
           </div>
-          {!controlado && (
-            <Button className="h-10 shrink-0" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4" strokeWidth={1.8} />
-              Agregar persona
+          <div className="flex shrink-0 gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => void refetch()}
+              aria-label="Actualizar listado"
+              title="Actualizar listado"
+            >
+              <ArrowsClockwise
+                className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
+               
+              />
             </Button>
-          )}
+            {!controlado && (
+              <Button onClick={() => setCreateOpen(true)}>
+                <Plus className="h-4 w-4" />
+                Agregar persona
+              </Button>
+            )}
+          </div>
         </div>
       </div>
-      <div className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
-          <div>
-            <h2 className="text-sm font-semibold">Listado de personas</h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {total} {total === 1 ? "registro" : "registros"}
-            </p>
+      <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/90 shadow-soft backdrop-blur-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-5 py-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+              {controlado ? (
+                <CheckSquare className="h-5 w-5" />
+              ) : (
+                <ClipboardText className="h-5 w-5" />
+              )}
+            </div>
+            <div>
+              <h2 className="text-sm font-bold">Listado de personas</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {total} {total === 1 ? "registro" : "registros"}
+              </p>
+            </div>
           </div>
-          <span className="text-xs text-muted-foreground">
+          <span
+            className={
+              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold " +
+              (controlado
+                ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                : "border-amber-500/25 bg-amber-500/10 text-amber-600 dark:text-amber-400")
+            }
+          >
+            <span
+              className={
+                "h-1.5 w-1.5 rounded-full " +
+                (controlado ? "bg-emerald-500" : "bg-amber-500")
+              }
+            />
             {controlado ? "Revisados" : "Pendientes"}
           </span>
         </div>
         {isError ? (
           <div className="flex flex-col items-center px-5 py-12 text-center">
             <div className="mb-4 flex h-10 w-10 items-center justify-center text-destructive">
-              <AlertCircle className="h-5 w-5" strokeWidth={1.6} />
+              <WarningCircle className="h-5 w-5" />
             </div>
             <h3 className="font-semibold">No se pudieron cargar los registros</h3>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">
@@ -177,16 +229,20 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
                 : "Ocurrió un error inesperado al consultar los datos."}
             </p>
             <Button className="mt-5" variant="outline" onClick={() => void refetch()}>
-              <RefreshCw className="h-4 w-4" strokeWidth={1.6} /> Reintentar
+              <ArrowsClockwise className="h-4 w-4" /> Reintentar
             </Button>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px] text-left text-sm">
-              <thead className="bg-muted/50 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <table className="w-full min-w-[820px] text-left text-sm">
+              <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 <tr>
                   {["UDO", "Apellido y nombre", "CUIL", "DNI", "Categoría", ""].map((h) => (
-                    <th key={h} scope="col" className="px-4 py-3">
+                    <th
+                      key={h}
+                      scope="col"
+                      className={h === "" ? "px-5 py-3.5 text-right" : "px-5 py-3.5"}
+                    >
                       {h}
                     </th>
                   ))}
@@ -195,7 +251,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
               <tbody>
                 {isLoading && (
                   <tr>
-                    <td colSpan={6} className="p-10 text-center text-muted-foreground">
+                    <td colSpan={6} className="px-5 py-14 text-center text-muted-foreground">
                       Cargando registros…
                     </td>
                   </tr>
@@ -204,50 +260,71 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
                   data?.rows.map((r) => (
                     <tr
                       key={r.id_legajo}
-                      className="border-t border-border transition-colors hover:bg-muted/40"
+                      className="group border-t border-border/50 transition-colors hover:bg-primary/[0.04]"
                     >
-                      <td className="px-4 py-3">{r.udo_codigo ?? "—"}</td>
-                      <td className="px-4 py-3 font-medium">{r.apellido_nombre}</td>
-                      <td className="px-4 py-3 font-mono text-xs">{r.cuil ?? "—"}</td>
-                      <td className="px-4 py-3 font-mono text-xs">{r.dni ?? "—"}</td>
-                      <td className="px-4 py-3">{r.categoria ?? "—"}</td>
-                      <td className="px-4 py-3 text-right">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          aria-label={`Editar ${r.apellido_nombre}`}
-                          onClick={() => setEditId(r.id_legajo)}
-                        >
-                          <Pencil className="h-4 w-4" strokeWidth={1.6} />
-                        </Button>
-                        {adminRole.data && (
+                      <td className="px-5 py-3.5">
+                        <span className="inline-flex rounded-lg bg-muted px-2 py-1 font-mono text-[11px] font-semibold text-muted-foreground">
+                          {r.udo_codigo ?? "—"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-gradient text-[11px] font-bold text-primary-foreground shadow-sm">
+                            {initialsOf(r.apellido_nombre ?? "?")}
+                          </div>
+                          <span className="font-semibold">{r.apellido_nombre}</span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 font-mono text-xs text-muted-foreground">
+                        {r.cuil ?? "—"}
+                      </td>
+                      <td className="px-5 py-3.5 font-mono text-xs text-muted-foreground">
+                        {r.dni ?? "—"}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="inline-flex rounded-full border border-border/60 bg-muted/50 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+                          {r.categoria ?? "—"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center justify-end gap-1">
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            aria-label={`Eliminar ${r.apellido_nombre}`}
-                            disabled={r.id_legajo === null}
-                            onClick={() => {
-                              const id = r.id_legajo;
-                              if (id !== null) {
-                                setDeleteTarget({ id, name: r.apellido_nombre ?? "" });
-                              }
-                            }}
+                            className="h-9 w-9 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                            aria-label={`Editar ${r.apellido_nombre}`}
+                            onClick={() => setEditId(r.id_legajo)}
                           >
-                            <Trash2 className="h-4 w-4" strokeWidth={1.6} />
+                            <PencilSimple className="h-4 w-4" />
                           </Button>
-                        )}
+                          {adminRole.data && (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-9 w-9 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              aria-label={`Eliminar ${r.apellido_nombre}`}
+                              disabled={r.id_legajo === null}
+                              onClick={() => {
+                                const id = r.id_legajo;
+                                if (id !== null) {
+                                  setDeleteTarget({ id, name: r.apellido_nombre ?? "" });
+                                }
+                              }}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
                 {!isLoading && !data?.rows.length && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-14 text-center">
-                      <UsersRound
-                        className="mx-auto h-7 w-7 text-muted-foreground/45"
-                        strokeWidth={1.4}
-                      />
-                      <p className="mt-3 font-medium">
+                    <td colSpan={6} className="px-5 py-16 text-center">
+                      <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-muted text-muted-foreground/60">
+                        <UsersThree className="h-6 w-6" />
+                      </div>
+                      <p className="mt-4 font-semibold">
                         {q.trim()
                           ? "No encontramos coincidencias"
                           : "Todavía no hay registros para mostrar"}
@@ -266,21 +343,27 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
         )}
       </div>
       {!isError && (
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-sm">
           <p className="text-muted-foreground">
             {total === 0
               ? "Sin resultados"
               : `Mostrando ${page * PAGE + 1}–${Math.min((page + 1) * PAGE, total)} de ${total}`}
           </p>
-          <div className="flex items-center gap-3">
-            <span className="text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="mr-1 hidden text-xs text-muted-foreground sm:inline">
               Página {page + 1} de {pages}
             </span>
-            <Button variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 0}
+              onClick={() => setPage(page - 1)}
+            >
               Anterior
             </Button>
             <Button
               variant="outline"
+              size="sm"
               disabled={page + 1 >= pages}
               onClick={() => setPage(page + 1)}
             >
@@ -389,7 +472,7 @@ function Sel({
     <div className="space-y-1">
       <Label>{label}</Label>
       <select
-        className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+        className={selectCls}
         value={value ?? ""}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
@@ -562,13 +645,13 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
           <DialogTitle>{f ? f.personas.apellido_nombre : "Cargando…"}</DialogTitle>
         </DialogHeader>
         {f && (
-          <div className="space-y-5">
-            <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase text-primary">
+          <div className="space-y-6">
+            <section className="space-y-3">
+              <h3 className="flex items-center gap-2 border-b border-border/60 pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
                 Datos personales
               </h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2 space-y-1">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="space-y-1 sm:col-span-2">
                   <Label>Apellido y nombre</Label>
                   <Input
                     value={f.personas.apellido_nombre}
@@ -592,7 +675,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                 <div className="space-y-1">
                   <Label>Sexo</Label>
                   <select
-                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                    className={selectCls}
                     value={f.personas.sexo ?? ""}
                     onChange={(e) => setP("sexo", e.target.value)}
                   >
@@ -611,10 +694,12 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                 </div>
               </div>
             </section>
-            <section>
-              <h3 className="mb-2 text-xs font-semibold uppercase text-primary">Datos laborales</h3>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
+            <section className="space-y-3">
+              <h3 className="flex items-center gap-2 border-b border-border/60 pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+                Datos laborales
+              </h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
                   <Sel
                     label="UDO presupuestaria"
                     value={f.id_udo}
@@ -670,7 +755,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                   error={cats.uni.error}
                   emptyMessage="No hay unidades organizativas asociadas a esta dirección"
                 />
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <Sel
                     label="Sector"
                     value={f.id_sector}
@@ -710,7 +795,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
             </section>
           </div>
         )}
-        <DialogFooter>
+        <DialogFooter className="border-t border-border/60 pt-4">
           <Button variant="outline" onClick={onClose}>
             Cancelar
           </Button>
@@ -887,8 +972,10 @@ function CrearPersonaDialog({
         )}
         <form id="crear-persona-form" onSubmit={save} className="space-y-6">
           <section className="space-y-3">
-            <h3 className="border-b pb-2 text-sm font-semibold">Datos personales</h3>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <h3 className="border-b border-border/60 pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+              Datos personales
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
                 {input("Apellido y nombre", "apellido_nombre", "text", true)}
               </div>
@@ -897,7 +984,7 @@ function CrearPersonaDialog({
               <div className="space-y-1.5">
                 <Label>Sexo</Label>
                 <select
-                  className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+                  className={selectCls}
                   value={f.sexo}
                   onChange={(e) => set("sexo", e.target.value)}
                 >
@@ -911,8 +998,10 @@ function CrearPersonaDialog({
           </section>
 
           <section className="space-y-3">
-            <h3 className="border-b pb-2 text-sm font-semibold">Datos del legajo</h3>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <h3 className="border-b border-border/60 pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+              Datos del legajo
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
               <Sel
                 label="UDO presupuestaria"
                 value={f.id_udo ? Number(f.id_udo) : null}
@@ -1005,7 +1094,7 @@ function CrearPersonaDialog({
             </div>
           </section>
         </form>
-        <DialogFooter>
+        <DialogFooter className="border-t border-border/60 pt-4">
           <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
             Cancelar
           </Button>

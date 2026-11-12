@@ -714,17 +714,23 @@ function CatalogosAdmin() {
 
   return (
     <div className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">
-      <div className="mb-6">
-        <p className="text-sm font-medium text-primary">Administración</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Datos maestros</h1>
-        <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
-          Gestioná la estructura organizativa y los catálogos utilizados por la planilla. Personas,
-          legajos e historia laboral no se administran desde este panel.
-        </p>
-      </div>
-
-      <div className="mb-4 flex justify-end">
-        <Button variant="outline" onClick={() => setImportOpen(true)}>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+            <ShieldAlert className="h-3.5 w-3.5" strokeWidth={1.8} />
+            Administración
+          </div>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">Datos maestros</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+            Gestioná la estructura organizativa y los catálogos utilizados por la planilla. Personas,
+            legajos e historia laboral no se administran desde este panel.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          className="w-full shrink-0 sm:w-auto"
+          onClick={() => setImportOpen(true)}
+        >
           <FileUp className="h-4 w-4" /> Importar personal
         </Button>
       </div>
@@ -746,17 +752,22 @@ function CatalogosAdmin() {
         </TabsList>
         <TabsContent value={group}>
           <div className="grid gap-5 lg:grid-cols-[250px_minmax(0,1fr)]">
-            <Card className="h-fit">
-              <CardHeader>
-                <CardTitle className="text-base">Datos a gestionar</CardTitle>
+            <Card className="h-fit lg:sticky lg:top-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-bold">Datos a gestionar</CardTitle>
                 <CardDescription>Seleccioná un grupo de datos.</CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-1">
+              <CardContent className="grid gap-1.5">
                 {visibleDefinitions.map((definition) => (
                   <Button
                     key={definition.key}
-                    variant={selectedKey === definition.key ? "secondary" : "ghost"}
-                    className="justify-start"
+                    variant="ghost"
+                    className={
+                      "justify-start rounded-xl px-3 " +
+                      (selectedKey === definition.key
+                        ? "bg-primary/10 font-bold text-primary hover:bg-primary/15"
+                        : "text-muted-foreground")
+                    }
                     onClick={() => setSelectedKey(definition.key)}
                   >
                     {definition.title}
@@ -768,7 +779,7 @@ function CatalogosAdmin() {
             <Card>
               <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
                 <div>
-                  <CardTitle>{selected.title}</CardTitle>
+                  <CardTitle className="text-lg font-bold">{selected.title}</CardTitle>
                   <CardDescription className="mt-1">
                     {items.length} {items.length === 1 ? "registro" : "registros"} · Los datos
                     existentes se conservan al desactivar un elemento.
@@ -785,7 +796,7 @@ function CatalogosAdmin() {
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                   <Button onClick={() => openForm()}>
-                    <Plus className="mr-2 h-4 w-4" /> Agregar
+                    <Plus className="h-4 w-4" /> Agregar
                   </Button>
                 </div>
               </CardHeader>
@@ -793,7 +804,7 @@ function CatalogosAdmin() {
                 {isLoading ? (
                   <p className="py-8 text-center text-sm text-muted-foreground">Cargando datos…</p>
                 ) : error ? (
-                  <div className="flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm">
+                  <div className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
                     <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
                     <div>
                       <p className="font-medium">No se pudieron cargar los catálogos.</p>
@@ -805,11 +816,11 @@ function CatalogosAdmin() {
                     Todavía no hay registros en este catálogo.
                   </p>
                 ) : (
-                  <div className="divide-y rounded-md border">
+                  <div className="divide-y divide-border/60 overflow-hidden rounded-2xl border border-border/60 bg-card/60">
                     {items.map((item) => (
                       <div
                         key={item.id}
-                        className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+                        className="group flex flex-wrap items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-primary/[0.04]"
                       >
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium">{item.label}</p>
@@ -820,12 +831,15 @@ function CatalogosAdmin() {
                           )}
                           {item.active !== null && (
                             <span
-                              className={`mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                              className={`mt-1.5 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${
                                 item.active
-                                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                                  : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                                  ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                  : "border-border bg-muted text-muted-foreground"
                               }`}
                             >
+                              <span
+                                className={`h-1.5 w-1.5 rounded-full ${item.active ? "bg-emerald-500" : "bg-muted-foreground/50"}`}
+                              />
                               {item.active ? "Activo" : "Inactivo"}
                             </span>
                           )}
@@ -834,7 +848,7 @@ function CatalogosAdmin() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-lg text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:text-sky-300 dark:hover:bg-sky-950"
+                            className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary"
                             aria-label={`Editar ${item.label}`}
                             onClick={() => openForm(item)}
                           >
@@ -846,8 +860,8 @@ function CatalogosAdmin() {
                               size="icon"
                               className={
                                 item.active
-                                  ? "h-8 w-8 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 dark:hover:bg-emerald-900"
-                                  : "h-8 w-8 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                                  ? "h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 dark:text-emerald-400"
+                                  : "h-8 w-8 rounded-lg bg-muted text-muted-foreground hover:bg-muted/80"
                               }
                               aria-label={`${item.active ? "Desactivar" : "Activar"} ${item.label}`}
                               disabled={stateMutationResult.isPending}
@@ -865,7 +879,7 @@ function CatalogosAdmin() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 rounded-lg text-rose-700 hover:bg-rose-100 hover:text-rose-800 dark:text-rose-300 dark:hover:bg-rose-950"
+                            className="h-8 w-8 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                             aria-label={`Eliminar ${item.label}`}
                             disabled={removeMutation.isPending}
                             onClick={() =>
@@ -954,7 +968,7 @@ function CatalogosAdmin() {
                           [field.key]: event.target.value,
                         }))
                       }
-                      className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      className="h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <option value="">Seleccioná una opción</option>
                       {field.optionsFrom
@@ -985,7 +999,7 @@ function CatalogosAdmin() {
                 </div>
               );
             })}
-            <DialogFooter>
+            <DialogFooter className="border-t border-border/60 pt-4">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
               </Button>

@@ -1,6 +1,15 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, RefreshCw, UsersRound } from "lucide-react";
+import {
+  AlertCircle,
+  BarChart3,
+  Building2,
+  LayoutGrid,
+  RefreshCw,
+  SlidersHorizontal,
+  UsersRound,
+  type LucideIcon,
+} from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -26,16 +35,27 @@ import { Label } from "@/components/ui/label";
 const PAGE_SIZE = 1000;
 const UNASSIGNED = "unassigned";
 const CHART_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-];
+  "#6366f1",
+  "#06b6d4",
+  "#10b981",
+  "#f59e0b",
+  "#ec4899",
+  "#8b5cf6",
+  "#14b8a6",
+  "#3b82f6",
+] as const;
 const CHART_CONFIG = {
-  count: { label: "Registros", color: "var(--chart-1)" },
+  count: { label: "Registros", color: CHART_COLORS[0] },
 } satisfies ChartConfig;
 const MAX_CHART_BARS = 8;
+const AGE_GROUPS = [
+  "Menos de 25",
+  "25 a 34",
+  "35 a 44",
+  "45 a 54",
+  "55 o más",
+  "Sin fecha válida",
+] as const;
 
 type DashboardFilters = {
   udo: string;
@@ -55,9 +75,11 @@ type DashboardRecord = {
   id_funcion: number | null;
   id_relacion_laboral: number | null;
   sexo: string | null;
+  fecha_nacimiento: string | null;
 };
 
 type DashboardDistributions = [
+  DistributionItem[],
   DistributionItem[],
   DistributionItem[],
   DistributionItem[],
@@ -103,7 +125,11 @@ async function loadDashboardData() {
         .range(from, to),
     ),
     loadAllPages((from, to) =>
-      supabase.from("personas").select("id_persona,sexo").order("id_persona").range(from, to),
+      supabase
+        .from("personas")
+        .select("id_persona,sexo,fecha_nacimiento")
+        .order("id_persona")
+        .range(from, to),
     ),
     loadAllPages((from, to) =>
       supabase
@@ -156,7 +182,12 @@ async function loadDashboardData() {
     ),
   ]);
 
-  const sexByPerson = new Map(people.map((person) => [person.id_persona, person.sexo]));
+  const personById = new Map(
+    people.map((person) => [
+      person.id_persona,
+      { sexo: person.sexo, fecha_nacimiento: person.fecha_nacimiento },
+    ]),
+  );
   const udoById = new Map(udos.map((item) => [item.id_udo, item.descripcion]));
   const secretariaById = new Map(secretarias.map((item) => [item.id_secretaria, item]));
   const direccionById = new Map(direcciones.map((item) => [item.id_direccion, item]));
@@ -172,7 +203,8 @@ async function loadDashboardData() {
       id_sector: record.id_sector,
       id_funcion: record.id_funcion,
       id_relacion_laboral: record.id_relacion_laboral,
-      sexo: sexByPerson.get(record.id_persona) ?? null,
+      sexo: personById.get(record.id_persona)?.sexo ?? null,
+      fecha_nacimiento: personById.get(record.id_persona)?.fecha_nacimiento ?? null,
     })),
     people,
     udos,
@@ -217,10 +249,42 @@ function distribution(
   return [...counts.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
+function ageGroup(dateOfBirth: string | null): string {
+  if (!dateOfBirth) return "Sin fecha válida";
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateOfBirth);
+  if (!match) return "Sin fecha válida";
+  const [, yearText, monthText, dayText] = match;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const birthday = new Date(Date.UTC(year, month - 1, day));
+  if (
+    birthday.getUTCFullYear() !== year ||
+    birthday.getUTCMonth() !== month - 1 ||
+    birthday.getUTCDate() !== day
+  ) {
+    return "Sin fecha válida";
+  }
+
+  const today = new Date();
+  let age = today.getFullYear() - year;
+  if (today.getMonth() + 1 < month || (today.getMonth() + 1 === month && today.getDate() < day)) {
+    age -= 1;
+  }
+  if (age < 0) return "Sin fecha válida";
+  if (age < 25) return AGE_GROUPS[0];
+  if (age < 35) return AGE_GROUPS[1];
+  if (age < 45) return AGE_GROUPS[2];
+  if (age < 55) return AGE_GROUPS[3];
+  return AGE_GROUPS[4];
+}
+
 function useDashboardData() {
   return useQuery({
     queryKey: ["admin-dashboard"],
     queryFn: loadDashboardData,
+    refetchInterval: 30000,
   });
 }
 
@@ -246,8 +310,8 @@ function DistributionCard({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base font-bold tracking-tight">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
@@ -330,29 +394,31 @@ function DistributionCard({
             >
               <BarChart
                 data={chartItems}
-                layout="vertical"
-                margin={{ top: 4, right: 28, bottom: 4, left: 4 }}
+                margin={{ top: 20, right: 12, bottom: 4, left: 0 }}
                 barCategoryGap={10}
               >
-                <CartesianGrid horizontal={false} stroke="var(--border)" strokeDasharray="3 3" />
+                <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
                 <XAxis
+                  type="category"
+                  dataKey="label"
+                  axisLine={false}
+                  tickLine={false}
+                  tickMargin={8}
+                  interval={0}
+                  angle={-25}
+                  textAnchor="end"
+                  height={72}
+                  tickFormatter={(value: string) =>
+                    value.length > 14 ? `${value.slice(0, 13)}…` : value
+                  }
+                />
+                <YAxis
                   type="number"
                   axisLine={false}
                   tickLine={false}
                   tickMargin={8}
                   allowDecimals={false}
                   tickFormatter={(value: number) => value.toLocaleString("es-AR")}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="label"
-                  width={112}
-                  axisLine={false}
-                  tickLine={false}
-                  tickMargin={8}
-                  tickFormatter={(value: string) =>
-                    value.length > 17 ? `${value.slice(0, 16)}…` : value
-                  }
                 />
                 <ChartTooltip
                   cursor={{ fill: "var(--muted)", opacity: 0.55 }}
@@ -370,13 +436,16 @@ function DistributionCard({
                 <Bar
                   dataKey="count"
                   fill="var(--color-count)"
-                  radius={[0, 6, 6, 0]}
-                  maxBarSize={24}
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={38}
                   isAnimationActive
                 >
+                  {chartItems.map((item, index) => (
+                    <Cell key={item.id} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                  ))}
                   <LabelList
                     dataKey="count"
-                    position="right"
+                    position="top"
                     className="fill-foreground text-xs"
                     formatter={(value: number) => value.toLocaleString("es-AR")}
                   />
@@ -421,7 +490,7 @@ function FilterSelect({
       <Label htmlFor={id}>{label}</Label>
       <select
         id={id}
-        className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+        className="h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
@@ -434,6 +503,40 @@ function FilterSelect({
         ))}
       </select>
     </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  hint,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: number;
+  hint: string;
+  icon: LucideIcon;
+  tone: string;
+}) {
+  return (
+    <Card className="relative overflow-hidden">
+      <div className="pointer-events-none absolute -right-10 -top-12 h-28 w-28 rounded-full bg-primary/10 blur-2xl" />
+      <CardContent className="relative flex items-start justify-between gap-3 p-5">
+        <div className="min-w-0">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+            {label}
+          </p>
+          <p className="mt-2 text-3xl font-extrabold tracking-tight tabular-nums">
+            {value.toLocaleString("es-AR")}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+        </div>
+        <div className={"grid h-11 w-11 shrink-0 place-items-center rounded-2xl " + tone}>
+          <Icon className="h-5 w-5" strokeWidth={1.7} />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -508,6 +611,7 @@ export function AdminDashboard() {
     if (!data) return null;
     const lookup = data.lookups;
     const bySex = new Map<string, DistributionItem>();
+    const byAge = new Map<string, DistributionItem>();
     for (const record of filteredRecords) {
       const normalized = (record.sexo ?? "").trim().toLocaleUpperCase("es-AR");
       const label =
@@ -519,6 +623,11 @@ export function AdminDashboard() {
       const current = bySex.get(label);
       if (current) current.count += 1;
       else bySex.set(label, { id: label, label, count: 1 });
+
+      const ageLabel = ageGroup(record.fecha_nacimiento);
+      const age = byAge.get(ageLabel);
+      if (age) age.count += 1;
+      else byAge.set(ageLabel, { id: ageLabel, label: ageLabel, count: 1 });
     }
 
     const result: DashboardDistributions = [
@@ -563,6 +672,10 @@ export function AdminDashboard() {
       distribution(filteredRecords, (record) => record.id_funcion, lookup.funcionById),
       distribution(filteredRecords, (record) => record.id_relacion_laboral, lookup.relacionById),
       [...bySex.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)),
+      AGE_GROUPS.flatMap((label) => {
+        const item = byAge.get(label);
+        return item ? [item] : [];
+      }),
     ];
     return result;
   }, [data, filteredRecords]);
@@ -577,40 +690,47 @@ export function AdminDashboard() {
   }
 
   const total = filteredRecords.length;
+  const udoCount = distributions?.[0].filter((item) => item.id !== UNASSIGNED).length ?? 0;
+  const sectorCount = distributions?.[3].filter((item) => item.id !== UNASSIGNED).length ?? 0;
+  const unassignedSectors = distributions?.[3].find((item) => item.id === UNASSIGNED)?.count ?? 0;
 
   return (
     <div className="mx-auto w-full max-w-screen-2xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="mb-3 inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
-            <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.6} />
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
+            <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.8} />
             Administración
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
             Dashboard de personal
           </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
             Distribución global o por estructura organizativa.
           </p>
         </div>
         <Button
           variant="outline"
+          className="w-full shrink-0 sm:w-auto"
           onClick={() => void dashboard.refetch()}
           disabled={dashboard.isFetching}
         >
-          <RefreshCw className={`mr-2 h-4 w-4 ${dashboard.isFetching ? "animate-spin" : ""}`} />
+          <RefreshCw className={`h-4 w-4 ${dashboard.isFetching ? "animate-spin" : ""}`} />
           Actualizar
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Ámbito del informe</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base font-bold">
+            <SlidersHorizontal className="h-4 w-4 text-primary" strokeWidth={1.8} />
+            Ámbito del informe
+          </CardTitle>
           <CardDescription>
             Dejá los filtros en “Todas” para ver el total global. Los niveles se filtran en orden.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <CardContent className="grid gap-4 pt-2 sm:grid-cols-2 lg:grid-cols-4">
           <FilterSelect
             id="dashboard-udo"
             label="UDO"
@@ -650,34 +770,54 @@ export function AdminDashboard() {
 
       {dashboard.isPending ? (
         <Card>
-          <CardContent className="py-12 text-center text-sm text-muted-foreground">
+          <CardContent className="py-14 text-center text-sm text-muted-foreground">
             Cargando estadísticas…
           </CardContent>
         </Card>
       ) : dashboard.error ? (
         <Card>
           <CardContent className="py-8">
-            <div className="rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm">
-              <p className="font-medium">No se pudieron cargar las estadísticas.</p>
-              <p className="mt-1 text-muted-foreground">{dashboard.error.message}</p>
+            <div className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
+              <div>
+                <p className="font-semibold">No se pudieron cargar las estadísticas.</p>
+                <p className="mt-1 text-muted-foreground">{dashboard.error.message}</p>
+              </div>
             </div>
           </CardContent>
         </Card>
       ) : (
         <>
-          <Card>
-            <CardContent className="flex items-center gap-4 py-5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary">
-                <UsersRound className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Registros en el ámbito seleccionado</p>
-                <p className="text-2xl font-semibold tabular-nums">
-                  {total.toLocaleString("es-AR")}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+              label="Total de legajos"
+              value={total}
+              hint="En el ámbito seleccionado"
+              icon={UsersRound}
+              tone="bg-primary/10 text-primary"
+            />
+            <StatCard
+              label="UDO con registros"
+              value={udoCount}
+              hint="Unidades presupuestarias"
+              icon={Building2}
+              tone="bg-sky-500/10 text-sky-600 dark:text-sky-400"
+            />
+            <StatCard
+              label="Sectores con registros"
+              value={sectorCount}
+              hint="Estructura organizativa"
+              icon={LayoutGrid}
+              tone="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+            />
+            <StatCard
+              label="Sin sector asignado"
+              value={unassignedSectors}
+              hint="Requieren revisión"
+              icon={AlertCircle}
+              tone="bg-amber-500/10 text-amber-600 dark:text-amber-400"
+            />
+          </div>
           {distributions && (
             <div className="grid gap-4 xl:grid-cols-2">
               <DistributionCard
@@ -722,6 +862,12 @@ export function AdminDashboard() {
                 items={distributions[6]}
                 total={total}
                 chartType="donut"
+              />
+              <DistributionCard
+                title="Registros por grupo de edad"
+                description="Edad calculada a partir de la fecha de nacimiento registrada"
+                items={distributions[7]}
+                total={total}
               />
             </div>
           )}
