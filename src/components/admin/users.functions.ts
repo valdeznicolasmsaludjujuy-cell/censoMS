@@ -67,6 +67,7 @@ export const listUsers = createServerFn({ method: "GET" })
       role: roleByUser.get(user.id) ?? null,
       createdAt: user.created_at,
       mustChangePassword: user.app_metadata?.["must_change_password"] === true,
+      isCurrentUser: user.id === context.userId,
     }));
   });
 
@@ -127,6 +128,58 @@ export const changeManagedUserRole = createServerFn({ method: "POST" })
       p_role: data.role,
     });
     if (error) throw new Error(`No se pudo actualizar el rol: ${error.message}`);
+  });
+
+export const deleteManagedUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator(userRoleUpdateSchema.pick({ userId: true }))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    if (data.userId === context.userId) {
+      throw new Error("No podés eliminar tu propia cuenta desde esta pantalla.");
+    }
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: target, error: targetError } = await supabaseAdmin.auth.admin.getUserById(
+      data.userId,
+    );
+    if (targetError) throw new Error(`No se encontró la cuenta: ${targetError.message}`);
+
+    const { data: roles, error: rolesError } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", data.userId);
+    if (rolesError)
+      throw new Error(`No se pudo verificar el rol de la cuenta: ${rolesError.message}`);
+
+    const previousRole = roles.some((entry) => entry.role === "admin") ? "admin" : roles[0]?.role;
+    if (previousRole === "admin") {
+      const { error: demoteError } = await context.supabase.rpc("admin_set_user_role", {
+        p_user_id: data.userId,
+        p_role: "consulta",
+      });
+      if (demoteError) {
+        throw new Error(`No se puede eliminar la cuenta administradora: ${demoteError.message}`);
+      }
+    }
+
+    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(data.userId);
+    if (deleteError) {
+      if (previousRole === "admin") {
+        const { error: restoreError } = await context.supabase.rpc("admin_set_user_role", {
+          p_user_id: data.userId,
+          p_role: "admin",
+        });
+        if (restoreError) {
+          throw new Error(
+            `No se pudo eliminar la cuenta y tampoco restaurar su rol administrador: ${deleteError.message}; ${restoreError.message}`,
+          );
+        }
+      }
+      throw new Error(
+        `No se pudo eliminar la cuenta de ${target.user.email ?? "usuario"}: ${deleteError.message}`,
+      );
+    }
   });
 
 export const resetManagedUserPassword = createServerFn({ method: "POST" })

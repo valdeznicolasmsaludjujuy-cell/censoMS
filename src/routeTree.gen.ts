@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedControladosRouteImport } from './routes/_authenticated/controlados'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedPlanillaRouteImport } from './routes/_authenticated/planilla'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
 
@@ -48,6 +49,11 @@ const AuthenticatedControladosRoute =
     path: '/controlados',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPlanillaRoute = AuthenticatedPlanillaRouteImport.update({
   id: '/planilla',
   path: '/planilla',
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/change-password': typeof ChangePasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/controlados': typeof AuthenticatedControladosRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/planilla': typeof AuthenticatedPlanillaRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
 }
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/change-password': typeof ChangePasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/controlados': typeof AuthenticatedControladosRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
   '/planilla': typeof AuthenticatedPlanillaRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
 }
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/change-password': typeof ChangePasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/controlados': typeof AuthenticatedControladosRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/planilla': typeof AuthenticatedPlanillaRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
 }
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/change-password'
     | '/admin'
     | '/controlados'
+    | '/dashboard'
     | '/planilla'
     | '/usuarios'
   fileRoutesByTo: FileRoutesByTo
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/change-password'
     | '/admin'
     | '/controlados'
+    | '/dashboard'
     | '/planilla'
     | '/usuarios'
   id:
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/change-password'
     | '/_authenticated/admin'
     | '/_authenticated/controlados'
+    | '/_authenticated/dashboard'
     | '/_authenticated/planilla'
     | '/_authenticated/usuarios'
   fileRoutesById: FileRoutesById
@@ -170,6 +182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedControladosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/planilla': {
       id: '/_authenticated/planilla'
       path: '/planilla'
@@ -190,6 +209,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedControladosRoute: typeof AuthenticatedControladosRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedPlanillaRoute: typeof AuthenticatedPlanillaRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
 }
@@ -197,6 +217,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedControladosRoute: AuthenticatedControladosRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedPlanillaRoute: AuthenticatedPlanillaRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
 }

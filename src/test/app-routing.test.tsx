@@ -23,6 +23,14 @@ describe("App routing", () => {
     expect(matches.at(-1)?.routeId).toBe("/_authenticated/admin");
   });
 
+  it("matches the administrator dashboard", () => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+
+    const matches = router.matchRoutes("/dashboard");
+
+    expect(matches.at(-1)?.routeId).toBe("/_authenticated/dashboard");
+  });
+
   it("matches the user management page", () => {
     const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
 
