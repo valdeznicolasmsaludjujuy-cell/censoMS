@@ -409,14 +409,14 @@ export function ImportarPersonalDialog({
           </div>
           {fileName && <p className="text-sm text-muted-foreground">Archivo: {fileName}</p>}
 
-          <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          <div className="rounded-2xl border border-amber-500/25 bg-amber-500/10 p-3.5 text-sm text-amber-800 dark:text-amber-200">
             La base no tiene un campo UDO directo en el legajo y este archivo no incluye sector. La
             columna UDO se validará, pero no se guardará ni aparecerá en la planilla hasta que se
             asigne un sector desde la estructura organizativa.
           </div>
 
           {rows.length > 0 && (
-            <div className="space-y-2 rounded-md border p-3">
+            <div className="space-y-2 rounded-2xl border border-border/60 bg-muted/30 p-3.5">
               <p className="text-sm font-medium">
                 {rows.length} filas listas para importar
                 {results.length > 0 && ` · ${results.length} filas con errores de formato`}
@@ -425,7 +425,7 @@ export function ImportarPersonalDialog({
                 Los duplicados por DNI o CUIL y los valores que no coincidan con catálogos se
                 omitirán y aparecerán en el reporte.
               </p>
-              <div className="max-h-44 overflow-auto rounded border">
+              <div className="max-h-44 overflow-auto rounded-xl border border-border/60">
                 <table className="w-full text-left text-xs">
                   <thead className="sticky top-0 bg-muted">
                     <tr>
@@ -481,7 +481,7 @@ export function ImportarPersonalDialog({
                   <Download className="h-4 w-4" /> Descargar reporte
                 </Button>
               </div>
-              <div className="max-h-48 overflow-auto rounded border">
+              <div className="max-h-48 overflow-auto rounded-xl border border-border/60">
                 <table className="w-full text-left text-xs">
                   <thead className="sticky top-0 bg-muted">
                     <tr>
@@ -512,7 +512,7 @@ export function ImportarPersonalDialog({
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="border-t border-border/60 pt-4">
           <Button
             type="button"
             variant="outline"
