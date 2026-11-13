@@ -23,9 +23,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  changeManagedUserUdo,
   changeManagedUserRole,
   createManagedUser,
   deleteManagedUser,
+  listActiveUdos,
   listUsers,
   resetManagedUserPassword,
 } from "@/components/admin/users.functions";
@@ -57,6 +59,7 @@ function UserManagement() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("carga");
+  const [udoId, setUdoId] = useState<number | null>(null);
   const [passwordTarget, setPasswordTarget] = useState<ManagedUser | null>(null);
   const [temporaryPassword, setTemporaryPassword] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<ManagedUser | null>(null);
@@ -66,8 +69,16 @@ function UserManagement() {
     queryFn: () => listUsers(),
   });
 
+  const udosQuery = useQuery({
+    queryKey: ["admin-user-udos"],
+    queryFn: () => listActiveUdos(),
+  });
+
   const createMutation = useMutation({
-    mutationFn: () => createManagedUser({ data: { email, password, role } }),
+    mutationFn: () => {
+      if (udoId === null) throw new Error("Seleccioná una UDO.");
+      return createManagedUser({ data: { email, password, role, udoId } });
+    },
     gcTime: 0,
     onSuccess: async (created) => {
       toast.success(
@@ -77,6 +88,7 @@ function UserManagement() {
       setEmail("");
       setPassword("");
       setRole("carga");
+      setUdoId(null);
       await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
     onError: (error: Error) => toast.error(error.message || "No se pudo crear el usuario"),
@@ -94,6 +106,20 @@ function UserManagement() {
     onError: (error: Error) => {
       toast.error(error.message || "No se pudo actualizar el rol");
       void queryClient.invalidateQueries({ queryKey: ["admin-role"] });
+      void queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+  });
+
+  const udoMutation = useMutation({
+    mutationFn: ({ userId, udoId }: { userId: string; udoId: number }) =>
+      changeManagedUserUdo({ data: { userId, udoId } }),
+    gcTime: 0,
+    onSuccess: async () => {
+      toast.success("UDO actualizada");
+      await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "No se pudo actualizar la UDO");
       void queryClient.invalidateQueries({ queryKey: ["admin-users"] });
     },
   });
@@ -191,7 +217,7 @@ function UserManagement() {
             </p>
           ) : (
             <div className="overflow-x-auto rounded-2xl border border-border/60">
-              <table className="w-full min-w-[780px] text-left text-sm">
+              <table className="w-full min-w-[980px] text-left text-sm">
                 <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                   <tr>
                     <th scope="col" className="px-5 py-3.5">
@@ -199,6 +225,9 @@ function UserManagement() {
                     </th>
                     <th scope="col" className="px-5 py-3.5">
                       Rol
+                    </th>
+                    <th scope="col" className="px-5 py-3.5">
+                      UDO
                     </th>
                     <th scope="col" className="px-5 py-3.5">
                       Alta
@@ -248,6 +277,39 @@ function UserManagement() {
                           {Object.entries(roleLabels).map(([value, label]) => (
                             <option key={value} value={value}>
                               {label}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <select
+                          aria-label={`UDO de ${user.email}`}
+                          value={user.udoId ?? ""}
+                          disabled={
+                            udoMutation.isPending || udosQuery.isPending || udosQuery.isError
+                          }
+                          onChange={(event) => {
+                            if (event.target.value) {
+                              udoMutation.mutate({
+                                userId: user.id,
+                                udoId: Number(event.target.value),
+                              });
+                            }
+                          }}
+                          className="h-10 w-full min-w-[180px] rounded-xl border border-input bg-card/80 px-3 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="" disabled>
+                            {user.udoId === null ? "Sin UDO asignada" : "Seleccioná una UDO"}
+                          </option>
+                          {user.udoId !== null &&
+                            !udosQuery.data?.some((udo) => udo.id_udo === user.udoId) && (
+                              <option value={user.udoId}>
+                                {user.udo ?? `UDO ${user.udoId}`} (inactiva)
+                              </option>
+                            )}
+                          {udosQuery.data?.map((udo) => (
+                            <option key={udo.id_udo} value={udo.id_udo}>
+                              {udo.descripcion}
                             </option>
                           ))}
                         </select>
@@ -344,6 +406,37 @@ function UserManagement() {
                 ))}
               </select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-user-udo">UDO</Label>
+              <select
+                id="new-user-udo"
+                required
+                value={udoId ?? ""}
+                disabled={udosQuery.isPending || udosQuery.isError}
+                onChange={(event) =>
+                  setUdoId(event.target.value ? Number(event.target.value) : null)
+                }
+                className="h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">
+                  {udosQuery.isPending
+                    ? "Cargando UDO…"
+                    : udosQuery.data?.length
+                      ? "Seleccioná una UDO"
+                      : "No hay UDO activas"}
+                </option>
+                {udosQuery.data?.map((udo) => (
+                  <option key={udo.id_udo} value={udo.id_udo}>
+                    {udo.descripcion}
+                  </option>
+                ))}
+              </select>
+              {udosQuery.isError && (
+                <p role="alert" className="text-xs text-destructive">
+                  No se pudieron cargar las UDO: {udosQuery.error.message}
+                </p>
+              )}
+            </div>
             <p className="text-sm text-muted-foreground">
               Compartí la contraseña temporal con el usuario por un canal seguro. El sistema le
               exigirá elegir una nueva al ingresar.
@@ -357,7 +450,15 @@ function UserManagement() {
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
+              <Button
+                type="submit"
+                disabled={
+                  createMutation.isPending ||
+                  udosQuery.isPending ||
+                  udosQuery.isError ||
+                  udoId === null
+                }
+              >
                 {createMutation.isPending ? "Creando…" : "Crear cuenta"}
               </Button>
             </DialogFooter>

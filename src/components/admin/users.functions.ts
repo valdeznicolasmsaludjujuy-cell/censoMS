@@ -10,11 +10,17 @@ const createUserSchema = z.object({
   email: z.string().email().max(254),
   password: z.string().min(8).max(72),
   role: userRoleSchema,
+  udoId: z.number().int().positive(),
 });
 
 const userRoleUpdateSchema = z.object({
   userId: z.string().uuid(),
   role: userRoleSchema,
+});
+
+const userUdoUpdateSchema = z.object({
+  userId: z.string().uuid(),
+  udoId: z.number().int().positive(),
 });
 
 const temporaryPasswordSchema = z.object({
@@ -41,34 +47,61 @@ export const listUsers = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const [{ data: roles, error: rolesError }, users] = await Promise.all([
-      supabaseAdmin.from("user_roles").select("user_id,role"),
-      (async () => {
-        const allUsers = [];
-        for (let page = 1; ; page += 1) {
-          const { data, error } = await supabaseAdmin.auth.admin.listUsers({
-            page,
-            perPage: 1000,
-          });
-          if (error) throw new Error(`No se pudieron cargar las cuentas: ${error.message}`);
-          allUsers.push(...data.users);
-          if (data.users.length < 1000) break;
-        }
-        return allUsers;
-      })(),
-    ]);
+    const [{ data: roles, error: rolesError }, users, { data: udos, error: udosError }] =
+      await Promise.all([
+        supabaseAdmin.from("user_roles").select("user_id,role"),
+        (async () => {
+          const allUsers = [];
+          for (let page = 1; ; page += 1) {
+            const { data, error } = await supabaseAdmin.auth.admin.listUsers({
+              page,
+              perPage: 1000,
+            });
+            if (error) throw new Error(`No se pudieron cargar las cuentas: ${error.message}`);
+            allUsers.push(...data.users);
+            if (data.users.length < 1000) break;
+          }
+          return allUsers;
+        })(),
+        supabaseAdmin.from("udos_presupuestarias").select("id_udo,descripcion"),
+      ]);
 
     if (rolesError) throw new Error(`No se pudieron cargar los roles: ${rolesError.message}`);
+    if (udosError) throw new Error(`No se pudieron cargar las UDO: ${udosError.message}`);
     const roleByUser = new Map(roles.map((entry) => [entry.user_id, entry.role as UserRole]));
+    const udoById = new Map(udos.map((udo) => [udo.id_udo, udo.descripcion]));
 
-    return users.map((user) => ({
-      id: user.id,
-      email: user.email ?? "(sin email)",
-      role: roleByUser.get(user.id) ?? null,
-      createdAt: user.created_at,
-      mustChangePassword: user.app_metadata?.["must_change_password"] === true,
-      isCurrentUser: user.id === context.userId,
-    }));
+    return users.map((user) => {
+      const metadataUdoId = user.app_metadata?.["udo_id"];
+      const udoId =
+        typeof metadataUdoId === "number" && Number.isInteger(metadataUdoId)
+          ? metadataUdoId
+          : null;
+      return {
+        id: user.id,
+        email: user.email ?? "(sin email)",
+        role: roleByUser.get(user.id) ?? null,
+        udoId,
+        udo: udoId === null ? null : (udoById.get(udoId) ?? null),
+        createdAt: user.created_at,
+        mustChangePassword: user.app_metadata?.["must_change_password"] === true,
+        isCurrentUser: user.id === context.userId,
+      };
+    });
+  });
+
+export const listActiveUdos = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("udos_presupuestarias")
+      .select("id_udo,descripcion")
+      .eq("estado", true)
+      .order("descripcion");
+    if (error) throw new Error(`No se pudieron cargar las UDO: ${error.message}`);
+    return data;
   });
 
 export const createManagedUser = createServerFn({ method: "POST" })
@@ -77,11 +110,19 @@ export const createManagedUser = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: udo, error: udoError } = await supabaseAdmin
+      .from("udos_presupuestarias")
+      .select("id_udo,estado")
+      .eq("id_udo", data.udoId)
+      .maybeSingle();
+    if (udoError) throw new Error(`No se pudo verificar la UDO: ${udoError.message}`);
+    if (!udo?.estado) throw new Error("La UDO seleccionada no existe o está inactiva.");
+
     const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
       password: data.password,
       email_confirm: true,
-      app_metadata: { must_change_password: true },
+      app_metadata: { must_change_password: true, udo_id: data.udoId },
     });
 
     if (createError) throw new Error(`No se pudo crear el usuario: ${createError.message}`);
@@ -128,6 +169,31 @@ export const changeManagedUserRole = createServerFn({ method: "POST" })
       p_role: data.role,
     });
     if (error) throw new Error(`No se pudo actualizar el rol: ${error.message}`);
+  });
+
+export const changeManagedUserUdo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator(userUdoUpdateSchema)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: udo, error: udoError } = await supabaseAdmin
+      .from("udos_presupuestarias")
+      .select("id_udo,estado")
+      .eq("id_udo", data.udoId)
+      .maybeSingle();
+    if (udoError) throw new Error(`No se pudo verificar la UDO: ${udoError.message}`);
+    if (!udo?.estado) throw new Error("La UDO seleccionada no existe o está inactiva.");
+
+    const { data: existing, error: userError } = await supabaseAdmin.auth.admin.getUserById(
+      data.userId,
+    );
+    if (userError) throw new Error(`No se encontró la cuenta: ${userError.message}`);
+
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.userId, {
+      app_metadata: { ...existing.user.app_metadata, udo_id: data.udoId },
+    });
+    if (error) throw new Error(`No se pudo actualizar la UDO: ${error.message}`);
   });
 
 export const deleteManagedUser = createServerFn({ method: "POST" })
