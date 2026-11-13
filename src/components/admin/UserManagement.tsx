@@ -322,12 +322,12 @@ function UserManagement() {
                 type="password"
                 autoComplete="new-password"
                 required
-                minLength={12}
+                minLength={8}
                 maxLength={72}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
-              <p className="text-xs text-muted-foreground">Debe tener entre 12 y 72 caracteres.</p>
+              <p className="text-xs text-muted-foreground">Debe tener entre 8 y 72 caracteres.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="new-user-role">Rol inicial</Label>
@@ -419,12 +419,12 @@ function UserManagement() {
                 type="password"
                 autoComplete="new-password"
                 required
-                minLength={12}
+                minLength={8}
                 maxLength={72}
                 value={temporaryPassword}
                 onChange={(event) => setTemporaryPassword(event.target.value)}
               />
-              <p className="text-xs text-muted-foreground">Debe tener entre 12 y 72 caracteres.</p>
+              <p className="text-xs text-muted-foreground">Debe tener entre 8 y 72 caracteres.</p>
             </div>
             <DialogFooter className="border-t border-border/60 pt-4">
               <Button

@@ -39,18 +39,6 @@ const PAGE = 20;
 const selectCls =
   "h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50";
 
-function initialsOf(name: string) {
-  return (
-    name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0])
-      .join("")
-      .toLocaleUpperCase("es-AR") || "?"
-  );
-}
-
 export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: string }) {
   const queryClient = useQueryClient();
   const adminRole = useQuery({
@@ -261,12 +249,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
                         </span>
                       </td>
                       <td className="px-5 py-3.5">
-                        <div className="flex items-center gap-3">
-                          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand-gradient text-[11px] font-bold text-primary-foreground shadow-sm">
-                            {initialsOf(r.apellido_nombre ?? "?")}
-                          </div>
-                          <span className="font-semibold">{r.apellido_nombre}</span>
-                        </div>
+                        <span className="font-semibold">{r.apellido_nombre}</span>
                       </td>
                       <td className="px-5 py-3.5 font-mono text-xs text-muted-foreground">
                         {r.cuil ?? "—"}

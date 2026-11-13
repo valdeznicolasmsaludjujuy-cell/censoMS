@@ -8,7 +8,7 @@ const userRoleSchema = z.enum(["admin", "carga", "consulta"]);
 
 const createUserSchema = z.object({
   email: z.string().email().max(254),
-  password: z.string().min(12).max(72),
+  password: z.string().min(8).max(72),
   role: userRoleSchema,
 });
 
@@ -19,10 +19,10 @@ const userRoleUpdateSchema = z.object({
 
 const temporaryPasswordSchema = z.object({
   userId: z.string().uuid(),
-  password: z.string().min(12).max(72),
+  password: z.string().min(8).max(72),
 });
 const ownPasswordSchema = z.object({
-  password: z.string().min(12).max(72),
+  password: z.string().min(8).max(72),
 });
 
 type UserRole = z.infer<typeof userRoleSchema>;
