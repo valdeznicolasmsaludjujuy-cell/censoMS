@@ -33,11 +33,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 const PAGE = 20;
 
 const selectCls =
   "h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50";
+const missingFieldCls =
+  "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/25";
+
+function isMissingValue(value: unknown) {
+  return value == null || (typeof value === "string" && value.trim() === "");
+}
 
 export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: string }) {
   const queryClient = useQueryClient();
@@ -80,7 +87,32 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
         .order("id_legajo", { ascending: false })
         .range(page * PAGE, page * PAGE + PAGE - 1);
       if (error) throw error;
-      return { rows: data ?? [], count: count ?? 0 };
+      const rows = data ?? [];
+      const legajoIds = rows.flatMap((row) => (row.id_legajo === null ? [] : [row.id_legajo]));
+      if (legajoIds.length === 0) {
+        return { rows: rows.map((row) => ({ ...row, escalafon: null })), count: count ?? 0 };
+      }
+
+      const { data: details, error: detailsError } = await supabase
+        .from("legajo")
+        .select("id_legajo,categorias(escalafones(descripcion))")
+        .in("id_legajo", legajoIds);
+      if (detailsError) throw detailsError;
+      const escalafonByLegajo = new Map(
+        details.map((detail) => [
+          detail.id_legajo,
+          detail.categorias?.escalafones?.descripcion ?? null,
+        ]),
+      );
+
+      return {
+        rows: rows.map((row) => ({
+          ...row,
+          escalafon:
+            row.id_legajo === null ? null : (escalafonByLegajo.get(row.id_legajo) ?? null),
+        })),
+        count: count ?? 0,
+      };
     },
   });
   const total = data?.count ?? 0;
@@ -215,10 +247,18 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-left text-sm">
+            <table className="w-full min-w-[980px] text-left text-sm">
               <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 <tr>
-                  {["UDO", "Apellido y nombre", "CUIL", "DNI", "Categoría", ""].map((h) => (
+                  {[
+                    "UDO",
+                    "Apellido y nombre",
+                    "CUIL",
+                    "DNI",
+                    "Categoría",
+                    "Escalafón",
+                    "",
+                  ].map((h) => (
                     <th
                       key={h}
                       scope="col"
@@ -232,7 +272,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
               <tbody>
                 {isLoading && (
                   <tr>
-                    <td colSpan={6} className="px-5 py-14 text-center text-muted-foreground">
+                    <td colSpan={7} className="px-5 py-14 text-center text-muted-foreground">
                       Cargando registros…
                     </td>
                   </tr>
@@ -260,6 +300,11 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
                       <td className="px-5 py-3.5">
                         <span className="inline-flex rounded-full border border-border/60 bg-muted/50 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
                           {r.categoria ?? "—"}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <span className="inline-flex rounded-full border border-border/60 bg-muted/50 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+                          {r.escalafon ?? "—"}
                         </span>
                       </td>
                       <td className="px-5 py-3.5">
@@ -296,7 +341,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
                   ))}
                 {!isLoading && !data?.rows.length && (
                   <tr>
-                    <td colSpan={6} className="px-5 py-16 text-center">
+                    <td colSpan={7} className="px-5 py-16 text-center">
                       <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-muted text-muted-foreground/60">
                         <UsersThree className="h-6 w-6" />
                       </div>
@@ -424,6 +469,7 @@ function Sel({
   loading = false,
   error,
   emptyMessage = "No hay opciones disponibles",
+  highlightMissing = false,
 }: {
   label: string;
   value: number | null;
@@ -433,6 +479,7 @@ function Sel({
   loading?: boolean;
   error?: Error | null;
   emptyMessage?: string;
+  highlightMissing?: boolean;
 }) {
   const placeholder = disabled
     ? "Seleccioná primero el nivel anterior"
@@ -448,7 +495,10 @@ function Sel({
     <div className="space-y-1">
       <Label>{label}</Label>
       <select
-        className={selectCls}
+        className={cn(
+          selectCls,
+          highlightMissing && isMissingValue(value) && missingFieldCls,
+        )}
         value={value ?? ""}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
@@ -518,6 +568,21 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
       return form;
     },
   });
+  const categoryId = typeof f?.id_categoria === "number" ? f.id_categoria : null;
+  const escalafonQuery = useQuery({
+    queryKey: ["categoria-escalafon", categoryId],
+    enabled: categoryId !== null,
+    queryFn: async () => {
+      if (categoryId === null) throw new Error("No hay una categoría seleccionada.");
+      const { data, error } = await supabase
+        .from("categorias")
+        .select("escalafones(descripcion)")
+        .eq("id_categoria", categoryId)
+        .single();
+      if (error) throw error;
+      return data.escalafones?.descripcion ?? null;
+    },
+  });
   const cats = {
     udo: useCat("udos_presupuestarias", "id_udo"),
     sec: useCat(
@@ -554,7 +619,6 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
     ),
     rel: useCat("relaciones_laborales", "id_relacion_laboral"),
     cat: useCat("categorias", "id_categoria"),
-    esc: useCat("escalafones", "id_escalafon"),
     agr: useCat("agrupamientos", "id_agrupamiento"),
     fun: useCat("funciones", "id_funcion"),
   };
@@ -630,6 +694,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                 <div className="space-y-1 sm:col-span-2">
                   <Label>Apellido y nombre</Label>
                   <Input
+                    className={isMissingValue(f.personas.apellido_nombre) ? missingFieldCls : ""}
                     value={f.personas.apellido_nombre}
                     onChange={(e) => setP("apellido_nombre", e.target.value)}
                   />
@@ -637,6 +702,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                 <div className="space-y-1">
                   <Label>DNI</Label>
                   <Input
+                    className={isMissingValue(f.personas.dni) ? missingFieldCls : ""}
                     value={f.personas.dni ?? ""}
                     onChange={(e) => setP("dni", e.target.value)}
                   />
@@ -644,6 +710,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                 <div className="space-y-1">
                   <Label>CUIL</Label>
                   <Input
+                    className={isMissingValue(f.personas.cuil) ? missingFieldCls : ""}
                     value={f.personas.cuil ?? ""}
                     onChange={(e) => setP("cuil", e.target.value)}
                   />
@@ -651,7 +718,10 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                 <div className="space-y-1">
                   <Label>Sexo</Label>
                   <select
-                    className={selectCls}
+                    className={cn(
+                      selectCls,
+                      isMissingValue(f.personas.sexo) && missingFieldCls,
+                    )}
                     value={f.personas.sexo ?? ""}
                     onChange={(e) => setP("sexo", e.target.value)}
                   >
@@ -664,6 +734,9 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                   <Label>Fecha de nacimiento</Label>
                   <Input
                     type="date"
+                    className={
+                      isMissingValue(f.personas.fecha_nacimiento) ? missingFieldCls : ""
+                    }
                     value={f.personas.fecha_nacimiento ?? ""}
                     onChange={(e) => setP("fecha_nacimiento", e.target.value)}
                   />
@@ -687,6 +760,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                       set("id_sector", null);
                     }}
                     opts={cats.udo.data}
+                    highlightMissing
                   />
                 </div>
                 <Sel
@@ -703,6 +777,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                   loading={cats.sec.isFetching}
                   error={cats.sec.error}
                   emptyMessage="No hay secretarías asociadas a esta UDO"
+                  highlightMissing
                 />
                 <Sel
                   label="Dirección"
@@ -717,6 +792,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                   loading={cats.dir.isFetching}
                   error={cats.dir.error}
                   emptyMessage="No hay direcciones asociadas a esta secretaría"
+                  highlightMissing
                 />
                 <Sel
                   label="Unidad organizativa (Subdirección / Coordinación)"
@@ -730,6 +806,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                   loading={cats.uni.isFetching}
                   error={cats.uni.error}
                   emptyMessage="No hay unidades organizativas asociadas a esta dirección"
+                  highlightMissing
                 />
                 <div className="sm:col-span-2">
                   <Sel
@@ -741,6 +818,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                     loading={cats.sector.isFetching}
                     error={cats.sector.error}
                     emptyMessage="No hay sectores asociados a esta unidad"
+                    highlightMissing
                   />
                 </div>
                 <Sel
@@ -748,25 +826,63 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                   value={f.id_relacion_laboral}
                   onChange={(v) => set("id_relacion_laboral", v)}
                   opts={cats.rel.data}
+                  highlightMissing
                 />
                 <Sel
                   label="Categoría"
                   value={f.id_categoria}
                   onChange={(v) => set("id_categoria", v)}
                   opts={cats.cat.data}
+                  highlightMissing
                 />
+                <div className="space-y-1">
+                  <Label>Escalafón</Label>
+                  <Input
+                    className={
+                      categoryId !== null &&
+                      !escalafonQuery.isFetching &&
+                      isMissingValue(escalafonQuery.data)
+                        ? missingFieldCls
+                        : ""
+                    }
+                    value={
+                      categoryId === null
+                        ? "—"
+                        : escalafonQuery.isFetching
+                          ? "Cargando…"
+                          : (escalafonQuery.data ?? "—")
+                    }
+                    readOnly
+                  />
+                  {escalafonQuery.isError && (
+                    <p role="alert" className="text-xs text-destructive">
+                      No se pudo cargar el escalafón: {escalafonQuery.error.message}
+                    </p>
+                  )}
+                </div>
                 <Sel
                   label="Agrupamiento"
                   value={f.id_agrupamiento}
                   onChange={(v) => set("id_agrupamiento", v)}
                   opts={cats.agr.data}
+                  highlightMissing
                 />
                 <Sel
                   label="Función"
                   value={f.id_funcion}
                   onChange={(v) => set("id_funcion", v)}
                   opts={cats.fun.data}
+                  highlightMissing
                 />
+                <div className="space-y-1">
+                  <Label htmlFor="edit-dependencia">Dependencia</Label>
+                  <Input
+                    id="edit-dependencia"
+                    className={isMissingValue(f.dependencia) ? missingFieldCls : ""}
+                    value={f.dependencia ?? ""}
+                    readOnly
+                  />
+                </div>
               </div>
             </section>
           </div>
