@@ -299,6 +299,57 @@ export type Database = {
           },
         ];
       };
+      novedades: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          dias: number | null;
+          fecha_desde: string;
+          fecha_hasta: string;
+          id_legajo: number;
+          id_novedad: number;
+          id_tipo_novedad: number;
+          observaciones: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          dias?: never;
+          fecha_desde: string;
+          fecha_hasta: string;
+          id_legajo: number;
+          id_novedad?: never;
+          id_tipo_novedad: number;
+          observaciones?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          dias?: never;
+          fecha_desde?: string;
+          fecha_hasta?: string;
+          id_legajo?: number;
+          id_novedad?: never;
+          id_tipo_novedad?: number;
+          observaciones?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "novedades_id_legajo_fkey";
+            columns: ["id_legajo"];
+            isOneToOne: false;
+            referencedRelation: "legajo";
+            referencedColumns: ["id_legajo"];
+          },
+          {
+            foreignKeyName: "novedades_id_tipo_novedad_fkey";
+            columns: ["id_tipo_novedad"];
+            isOneToOne: false;
+            referencedRelation: "tipos_novedad";
+            referencedColumns: ["id_tipo_novedad"];
+          },
+        ];
+      };
       personas: {
         Row: {
           apellido_nombre: string;
@@ -425,6 +476,27 @@ export type Database = {
             referencedColumns: ["id_unidad"];
           },
         ];
+      };
+      tipos_novedad: {
+        Row: {
+          created_at: string;
+          descripcion: string;
+          estado: boolean;
+          id_tipo_novedad: number;
+        };
+        Insert: {
+          created_at?: string;
+          descripcion: string;
+          estado?: boolean;
+          id_tipo_novedad?: never;
+        };
+        Update: {
+          created_at?: string;
+          descripcion?: string;
+          estado?: boolean;
+          id_tipo_novedad?: never;
+        };
+        Relationships: [];
       };
       udos_presupuestarias: {
         Row: {

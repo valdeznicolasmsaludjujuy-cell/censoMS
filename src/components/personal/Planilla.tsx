@@ -12,6 +12,7 @@ import {
   WarningCircle,
 } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { calculateInclusiveDays } from "@/lib/novedades";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,13 @@ const selectCls =
   "h-11 w-full rounded-xl border border-input bg-card/80 px-3.5 text-sm shadow-sm transition-colors hover:border-primary/35 focus-visible:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50";
 const missingFieldCls =
   "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/25";
+
+type NovedadEnPantalla = {
+  id: string;
+  id_tipo_novedad: number | null;
+  fecha_desde: string;
+  fecha_hasta: string;
+};
 
 function isMissingValue(value: unknown) {
   return value == null || (typeof value === "string" && value.trim() === "");
@@ -108,8 +116,7 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
       return {
         rows: rows.map((row) => ({
           ...row,
-          escalafon:
-            row.id_legajo === null ? null : (escalafonByLegajo.get(row.id_legajo) ?? null),
+          escalafon: row.id_legajo === null ? null : (escalafonByLegajo.get(row.id_legajo) ?? null),
         })),
         count: count ?? 0,
       };
@@ -250,23 +257,17 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
             <table className="w-full min-w-[980px] text-left text-sm">
               <thead className="bg-muted/40 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 <tr>
-                  {[
-                    "UDO",
-                    "Apellido y nombre",
-                    "CUIL",
-                    "DNI",
-                    "Categoría",
-                    "Escalafón",
-                    "",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      scope="col"
-                      className={h === "" ? "px-5 py-3.5 text-right" : "px-5 py-3.5"}
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  {["UDO", "Apellido y nombre", "CUIL", "DNI", "Categoría", "Escalafón", ""].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        scope="col"
+                        className={h === "" ? "px-5 py-3.5 text-right" : "px-5 py-3.5"}
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -495,10 +496,7 @@ function Sel({
     <div className="space-y-1">
       <Label>{label}</Label>
       <select
-        className={cn(
-          selectCls,
-          highlightMissing && isMissingValue(value) && missingFieldCls,
-        )}
+        className={cn(selectCls, highlightMissing && isMissingValue(value) && missingFieldCls)}
         value={value ?? ""}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
@@ -520,6 +518,19 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [f, setF] = useState<any>(null);
   const [saving, setSaving] = useState(false);
+  const [novedades, setNovedades] = useState<NovedadEnPantalla[]>([]);
+  const [savingNovedadId, setSavingNovedadId] = useState<string | null>(null);
+  const canWriteNovedadesQuery = useQuery({
+    queryKey: ["can-write-novedades"],
+    queryFn: async () => {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      if (!userData.user) return false;
+      const { data, error } = await supabase.rpc("can_write", { _u: userData.user.id });
+      if (error) throw error;
+      return data;
+    },
+  });
   useQuery({
     queryKey: ["legajo", id],
     queryFn: async () => {
@@ -566,6 +577,30 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
       const form = { ...data, id_udo, id_secretaria, id_direccion, id_unidad };
       setF(form);
       return form;
+    },
+  });
+  const tiposNovedadQuery = useQuery({
+    queryKey: ["tipos-novedad"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tipos_novedad")
+        .select("id_tipo_novedad,descripcion")
+        .eq("estado", true)
+        .order("descripcion");
+      if (error) throw error;
+      return data;
+    },
+  });
+  const novedadesQuery = useQuery({
+    queryKey: ["legajo-novedades", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("novedades")
+        .select("id_novedad,id_tipo_novedad,fecha_desde,fecha_hasta,dias")
+        .eq("id_legajo", id)
+        .order("fecha_desde", { ascending: false });
+      if (error) throw error;
+      return data;
     },
   });
   const categoryId = typeof f?.id_categoria === "number" ? f.id_categoria : null;
@@ -628,6 +663,51 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
       ...current,
       personas: { ...current.personas, [k]: v },
     }));
+  const updateNovedad = (
+    id: string,
+    key: keyof Omit<NovedadEnPantalla, "id">,
+    value: number | string | null,
+  ) => {
+    setNovedades((current) =>
+      current.map((novedad) => (novedad.id === id ? { ...novedad, [key]: value } : novedad)),
+    );
+  };
+
+  async function registrarNovedad(novedad: NovedadEnPantalla) {
+    if (novedad.id_tipo_novedad === null) {
+      toast.error("Seleccioná un tipo de novedad");
+      return;
+    }
+    if (!novedad.fecha_desde || !novedad.fecha_hasta) {
+      toast.error("Completá la fecha de inicio y la fecha de fin");
+      return;
+    }
+
+    const dias = calculateInclusiveDays(novedad.fecha_desde, novedad.fecha_hasta);
+    if (dias === null) {
+      toast.error("La fecha de fin debe ser igual o posterior a la de inicio");
+      return;
+    }
+
+    setSavingNovedadId(novedad.id);
+    try {
+      const { error } = await supabase.from("novedades").insert({
+        id_legajo: id,
+        id_tipo_novedad: novedad.id_tipo_novedad,
+        fecha_desde: novedad.fecha_desde,
+        fecha_hasta: novedad.fecha_hasta,
+      });
+      if (error) throw error;
+
+      setNovedades((current) => current.filter((entry) => entry.id !== novedad.id));
+      await qc.invalidateQueries({ queryKey: ["legajo-novedades", id] });
+      toast.success("Novedad registrada");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo registrar la novedad");
+    } finally {
+      setSavingNovedadId(null);
+    }
+  }
 
   async function save(): Promise<void> {
     const p = f.personas;
@@ -718,10 +798,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                 <div className="space-y-1">
                   <Label>Sexo</Label>
                   <select
-                    className={cn(
-                      selectCls,
-                      isMissingValue(f.personas.sexo) && missingFieldCls,
-                    )}
+                    className={cn(selectCls, isMissingValue(f.personas.sexo) && missingFieldCls)}
                     value={f.personas.sexo ?? ""}
                     onChange={(e) => setP("sexo", e.target.value)}
                   >
@@ -734,9 +811,7 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                   <Label>Fecha de nacimiento</Label>
                   <Input
                     type="date"
-                    className={
-                      isMissingValue(f.personas.fecha_nacimiento) ? missingFieldCls : ""
-                    }
+                    className={isMissingValue(f.personas.fecha_nacimiento) ? missingFieldCls : ""}
                     value={f.personas.fecha_nacimiento ?? ""}
                     onChange={(e) => setP("fecha_nacimiento", e.target.value)}
                   />
@@ -884,6 +959,223 @@ function Editor({ id, onClose }: { id: number; onClose: () => void }) {
                   />
                 </div>
               </div>
+            </section>
+            <section className="space-y-4 rounded-xl border border-border/60 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h3 className="flex items-center gap-2 border-b border-border/60 pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-primary">
+                  Novedades
+                </h3>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={
+                    canWriteNovedadesQuery.isPending ||
+                    canWriteNovedadesQuery.isError ||
+                    !canWriteNovedadesQuery.data ||
+                    tiposNovedadQuery.isPending ||
+                    tiposNovedadQuery.isError ||
+                    !tiposNovedadQuery.data?.length
+                  }
+                  onClick={() =>
+                    setNovedades((current) => [
+                      ...current,
+                      {
+                        id: crypto.randomUUID(),
+                        id_tipo_novedad: null,
+                        fecha_desde: "",
+                        fecha_hasta: "",
+                      },
+                    ])
+                  }
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar novedad
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                El período cuenta ambos días. Registrá cada novedad para guardarla en este legajo.
+              </p>
+              {canWriteNovedadesQuery.isError && (
+                <p role="alert" className="text-sm text-destructive">
+                  No se pudo verificar el permiso para registrar novedades:{" "}
+                  {canWriteNovedadesQuery.error.message}
+                </p>
+              )}
+              {canWriteNovedadesQuery.data === false && (
+                <p className="text-sm text-muted-foreground">
+                  Solo los usuarios con perfil administrador o carga pueden agregar novedades.
+                </p>
+              )}
+              {!tiposNovedadQuery.isPending &&
+                !tiposNovedadQuery.isError &&
+                !tiposNovedadQuery.data?.length && (
+                  <p className="text-sm text-muted-foreground">
+                    No se puede agregar una novedad hasta que haya tipos activos disponibles.
+                  </p>
+                )}
+              {tiposNovedadQuery.isError && (
+                <p role="alert" className="text-sm text-destructive">
+                  No se pudieron cargar los tipos de novedad: {tiposNovedadQuery.error.message}
+                </p>
+              )}
+              {tiposNovedadQuery.data?.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No hay tipos de novedad activos para seleccionar.
+                </p>
+              )}
+              {novedadesQuery.isPending ? (
+                <p className="text-sm text-muted-foreground">Cargando novedades registradas…</p>
+              ) : novedadesQuery.isError ? (
+                <p role="alert" className="text-sm text-destructive">
+                  No se pudieron cargar las novedades: {novedadesQuery.error.message}
+                </p>
+              ) : novedadesQuery.data.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Todavía no hay novedades registradas.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {novedadesQuery.data.map((novedad) => {
+                    const dias =
+                      novedad.dias ??
+                      calculateInclusiveDays(novedad.fecha_desde, novedad.fecha_hasta);
+                    const tipo = tiposNovedadQuery.data?.find(
+                      (item) => item.id_tipo_novedad === novedad.id_tipo_novedad,
+                    );
+
+                    return (
+                      <div
+                        key={novedad.id_novedad}
+                        className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border/60 px-4 py-3 text-sm"
+                      >
+                        <div>
+                          <p className="font-medium">
+                            {tipo?.descripcion ?? `Tipo ${novedad.id_tipo_novedad}`}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {novedad.fecha_desde} al {novedad.fecha_hasta}
+                          </p>
+                        </div>
+                        <p className="text-sm font-semibold">
+                          {dias === null
+                            ? "Días sin calcular"
+                            : `${dias} ${dias === 1 ? "día" : "días"}`}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {novedades.length > 0 && (
+                <div className="space-y-4">
+                  {novedades.map((novedad, index) => {
+                    const dias = calculateInclusiveDays(novedad.fecha_desde, novedad.fecha_hasta);
+                    const rangoInvalido =
+                      Boolean(novedad.fecha_desde && novedad.fecha_hasta) && dias === null;
+
+                    return (
+                      <fieldset
+                        key={novedad.id}
+                        className="grid grid-cols-1 gap-4 rounded-lg border border-border/60 p-4 sm:grid-cols-2"
+                      >
+                        <legend className="px-2 text-sm font-semibold">Novedad {index + 1}</legend>
+                        <div className="space-y-1 sm:col-span-2">
+                          <Label htmlFor={`novedad-tipo-${novedad.id}`}>Tipo de novedad</Label>
+                          <select
+                            id={`novedad-tipo-${novedad.id}`}
+                            className={selectCls}
+                            value={novedad.id_tipo_novedad ?? ""}
+                            disabled={
+                              tiposNovedadQuery.isPending ||
+                              tiposNovedadQuery.isError ||
+                              !tiposNovedadQuery.data?.length
+                            }
+                            onChange={(event) =>
+                              updateNovedad(
+                                novedad.id,
+                                "id_tipo_novedad",
+                                event.target.value ? Number(event.target.value) : null,
+                              )
+                            }
+                          >
+                            <option value="">Seleccioná una novedad</option>
+                            {tiposNovedadQuery.data?.map((tipo) => (
+                              <option key={tipo.id_tipo_novedad} value={tipo.id_tipo_novedad}>
+                                {tipo.descripcion}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor={`novedad-inicio-${novedad.id}`}>Fecha de inicio</Label>
+                          <Input
+                            id={`novedad-inicio-${novedad.id}`}
+                            type="date"
+                            value={novedad.fecha_desde}
+                            onChange={(event) =>
+                              updateNovedad(novedad.id, "fecha_desde", event.target.value)
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor={`novedad-fin-${novedad.id}`}>Fecha de fin</Label>
+                          <Input
+                            id={`novedad-fin-${novedad.id}`}
+                            type="date"
+                            min={novedad.fecha_desde || undefined}
+                            value={novedad.fecha_hasta}
+                            onChange={(event) =>
+                              updateNovedad(novedad.id, "fecha_hasta", event.target.value)
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label htmlFor={`novedad-dias-${novedad.id}`}>Cantidad de días</Label>
+                          <output
+                            id={`novedad-dias-${novedad.id}`}
+                            aria-live="polite"
+                            className="flex h-11 items-center rounded-xl border border-input bg-muted/30 px-3.5 text-sm"
+                          >
+                            {dias === null ? "—" : `${dias} ${dias === 1 ? "día" : "días"}`}
+                          </output>
+                          {rangoInvalido && (
+                            <p role="alert" className="text-xs text-destructive">
+                              La fecha de fin debe ser igual o posterior a la de inicio.
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-end justify-end gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={savingNovedadId === novedad.id}
+                            onClick={() => registrarNovedad(novedad)}
+                          >
+                            {savingNovedadId === novedad.id ? "Registrando…" : "Registrar"}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            aria-label={`Eliminar novedad ${index + 1}`}
+                            disabled={savingNovedadId === novedad.id}
+                            onClick={() =>
+                              setNovedades((current) =>
+                                current.filter((entry) => entry.id !== novedad.id),
+                              )
+                            }
+                          >
+                            <Trash className="h-4 w-4" />
+                            Quitar
+                          </Button>
+                        </div>
+                      </fieldset>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           </div>
         )}
