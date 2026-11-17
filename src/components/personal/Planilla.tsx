@@ -76,8 +76,25 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [filtroUdo, setFiltroUdo] = useState<number | null | undefined>(undefined);
+  const udosQuery = useQuery({
+    queryKey: ["cat", "udos_presupuestarias", "filtro"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("udos_presupuestarias")
+        .select("id_udo,codigo,descripcion")
+        .order("descripcion");
+      if (error) throw error;
+      return data;
+    },
+    enabled: adminRole.data === true,
+  });
+  const udoSeleccionada =
+    filtroUdo === undefined || filtroUdo === null
+      ? null
+      : (udosQuery.data?.find((udo) => udo.id_udo === filtroUdo)?.descripcion ?? null);
   const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
-    queryKey: ["planilla", controlado, page, q],
+    queryKey: ["planilla", controlado, page, q, adminRole.data, filtroUdo, udoSeleccionada],
     placeholderData: keepPreviousData,
     refetchInterval: 15000,
     queryFn: async () => {
@@ -87,6 +104,10 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
           count: "exact",
         })
         .eq("controlado", controlado);
+      if (adminRole.data && filtroUdo !== undefined) {
+        if (filtroUdo === null) s = s.is("udo", null);
+        else if (udoSeleccionada) s = s.eq("udo", udoSeleccionada);
+      }
       if (q.trim()) {
         const t = q.trim().replace(/[,()]/g, "");
         s = s.or(`apellido_nombre.ilike.%${t}%,dni.ilike.%${t}%,cuil.ilike.%${t}%`);
@@ -185,6 +206,36 @@ export function Planilla({ controlado, titulo }: { controlado: boolean; titulo: 
               aria-label="Buscar por nombre, DNI o CUIL"
             />
           </div>
+          {adminRole.data && (
+            <div className="w-full sm:w-72">
+              <select
+                className={selectCls}
+                aria-label="Filtrar por UDO"
+                value={
+                  filtroUdo === undefined ? "" : filtroUdo === null ? "sin" : String(filtroUdo)
+                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFiltroUdo(value === "" ? undefined : value === "sin" ? null : Number(value));
+                  setPage(0);
+                }}
+                disabled={udosQuery.isPending || udosQuery.isError}
+              >
+                <option value="">{udosQuery.isPending ? "Cargando UDO…" : "Todas las UDO"}</option>
+                <option value="sin">Sin UDO</option>
+                {udosQuery.data?.map((udo) => (
+                  <option key={udo.id_udo} value={udo.id_udo}>
+                    {udo.codigo ? `${udo.codigo} · ${udo.descripcion}` : udo.descripcion}
+                  </option>
+                ))}
+              </select>
+              {udosQuery.isError && (
+                <p role="alert" className="mt-1 text-xs text-destructive">
+                  No se pudieron cargar las UDO.
+                </p>
+              )}
+            </div>
+          )}
           <div className="flex shrink-0 gap-2">
             <Button
               variant="outline"
