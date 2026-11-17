@@ -83,13 +83,13 @@ function ChangePasswordPage() {
               id="new-password"
               type="password"
               autoComplete="new-password"
-              minLength={12}
+              minLength={8}
               maxLength={72}
               required
               value={password}
               onChange={(event) => setPassword(event.target.value)}
             />
-            <p className="text-xs text-muted-foreground">Usá entre 12 y 72 caracteres.</p>
+            <p className="text-xs text-muted-foreground">Usá entre 8 y 72 caracteres.</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="confirm-password">Confirmar contraseña</Label>
@@ -97,7 +97,7 @@ function ChangePasswordPage() {
               id="confirm-password"
               type="password"
               autoComplete="new-password"
-              minLength={12}
+              minLength={8}
               maxLength={72}
               required
               value={confirmation}

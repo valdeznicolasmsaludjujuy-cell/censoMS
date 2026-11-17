@@ -35,6 +35,10 @@ Los filtros UDO → secretaría → dirección → sector permiten consultar un 
 filtros, los reportes son globales. Los conteos incluyen los legajos sin datos de catálogo como
 “Sin asignar” y la opción **Actualizar** vuelve a consultar la base.
 
+Desde la edición de un legajo se pueden registrar varias novedades, usando los tipos activos de
+`tipos_novedad`. Cada novedad se guarda en `novedades` con sus fechas y duración inclusiva en días;
+las políticas RLS deben permitir la lectura del catálogo y la inserción de novedades para el usuario.
+
 La aplicación ofrece tema claro y oscuro desde el botón de sol/luna del menú. La selección se guarda
 en el navegador; si todavía no elegiste un tema, se usa la preferencia del sistema operativo.
 

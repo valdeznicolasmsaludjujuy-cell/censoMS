@@ -89,7 +89,6 @@ function AuthPage() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/50">
                 Ministerio de Salud
               </p>
-              <p className="mt-1 text-sm font-bold tracking-tight">Gestión de Personal</p>
             </div>
           </div>
 
@@ -99,20 +98,18 @@ function AuthPage() {
               Sistema operativo
             </span>
             <h2 className="mt-5 text-3xl font-extrabold leading-[1.1] tracking-tight">
-              Cada legajo,
+              CENSO
               <br />
-              <span className="text-brand-gradient">en su lugar.</span>
+              <span className="text-brand-gradient">PERSONAL SALUD.</span>
             </h2>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-sidebar-foreground/60">
-              Centralizá altas, controles y reportes del personal en una sola plataforma.
-            </p>
+            
           </div>
 
           <div className="relative space-y-3">
             {[
-              { icon: ShieldCheck, text: "Acceso seguro por roles" },
+              { icon: ShieldCheck, text: "Gestion de Personal" },
               { icon: CheckSquare, text: "Legajos siempre actualizados" },
-              { icon: ChartBar, text: "Reportes en tiempo real" },
+              { icon: ChartBar, text: "Reportes " },
             ].map(({ icon: Icon, text }) => (
               <div
                 key={text}
@@ -127,7 +124,7 @@ function AuthPage() {
           </div>
 
           <p className="relative text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/35">
-            Uso interno · Ministerio de Salud
+            Ministerio de Salud
           </p>
         </div>
 
@@ -145,12 +142,6 @@ function AuthPage() {
           <div className="mt-8 md:mt-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
               Acceso institucional
-            </p>
-            <h1 className="mt-2 text-2xl font-extrabold tracking-tight sm:text-3xl">
-              Bienvenido de nuevo
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Ingresá con tu cuenta para continuar con la gestión de personal.
             </p>
           </div>
 
