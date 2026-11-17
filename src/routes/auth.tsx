@@ -107,9 +107,9 @@ function AuthPage() {
 
           <div className="relative space-y-3">
             {[
-              { icon: ShieldCheck, text: "Acceso seguro por roles" },
+              { icon: ShieldCheck, text: "Gestion de Personal" },
               { icon: CheckSquare, text: "Legajos siempre actualizados" },
-              { icon: ChartBar, text: "Reportes en tiempo real" },
+              { icon: ChartBar, text: "Reportes " },
             ].map(({ icon: Icon, text }) => (
               <div
                 key={text}
