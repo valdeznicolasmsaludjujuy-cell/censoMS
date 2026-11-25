@@ -361,7 +361,6 @@ export type Database = {
             referencedRelation: "personas"
             referencedColumns: ["id_persona"]
           },
-<<<<<<< HEAD
           {
             foreignKeyName: "legajo_id_persona_fkey"
             columns: ["id_persona"]
@@ -438,61 +437,6 @@ export type Database = {
         }
         Relationships: []
       }
-=======
-        ];
-      };
-      novedades: {
-        Row: {
-          created_at: string;
-          created_by: string | null;
-          dias: number | null;
-          fecha_desde: string;
-          fecha_hasta: string;
-          id_legajo: number;
-          id_novedad: number;
-          id_tipo_novedad: number;
-          observaciones: string | null;
-        };
-        Insert: {
-          created_at?: string;
-          created_by?: string | null;
-          dias?: never;
-          fecha_desde: string;
-          fecha_hasta: string;
-          id_legajo: number;
-          id_novedad?: never;
-          id_tipo_novedad: number;
-          observaciones?: string | null;
-        };
-        Update: {
-          created_at?: string;
-          created_by?: string | null;
-          dias?: never;
-          fecha_desde?: string;
-          fecha_hasta?: string;
-          id_legajo?: number;
-          id_novedad?: never;
-          id_tipo_novedad?: number;
-          observaciones?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "novedades_id_legajo_fkey";
-            columns: ["id_legajo"];
-            isOneToOne: false;
-            referencedRelation: "legajo";
-            referencedColumns: ["id_legajo"];
-          },
-          {
-            foreignKeyName: "novedades_id_tipo_novedad_fkey";
-            columns: ["id_tipo_novedad"];
-            isOneToOne: false;
-            referencedRelation: "tipos_novedad";
-            referencedColumns: ["id_tipo_novedad"];
-          },
-        ];
-      };
->>>>>>> dev
       personas: {
         Row: {
           apellido_nombre: string
@@ -629,7 +573,6 @@ export type Database = {
             referencedRelation: "unidades_organizativas"
             referencedColumns: ["id_unidad"]
           },
-<<<<<<< HEAD
         ]
       }
       titulos: {
@@ -653,31 +596,6 @@ export type Database = {
         }
         Relationships: []
       }
-=======
-        ];
-      };
-      tipos_novedad: {
-        Row: {
-          created_at: string;
-          descripcion: string;
-          estado: boolean;
-          id_tipo_novedad: number;
-        };
-        Insert: {
-          created_at?: string;
-          descripcion: string;
-          estado?: boolean;
-          id_tipo_novedad?: never;
-        };
-        Update: {
-          created_at?: string;
-          descripcion?: string;
-          estado?: boolean;
-          id_tipo_novedad?: never;
-        };
-        Relationships: [];
-      };
->>>>>>> dev
       udos_presupuestarias: {
         Row: {
           codigo: string | null
